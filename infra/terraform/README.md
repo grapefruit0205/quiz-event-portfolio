@@ -1,10 +1,10 @@
-# Step 3 기반 + Step 4 API + Step 5 분석 + Step 6 모니터링 Terraform
+# Step 3 기반부터 Step 7 제한 속도 복구까지의 Terraform
 
-Step 3의 기반 리소스, Step 4의 API, Step 5의 분석 경로, Step 6의 알람·Budget을 한 state로 관리합니다. 상세 설명은 [STEP4.md](STEP4.md), [STEP5.md](STEP5.md), [STEP6.md](STEP6.md)에 있습니다.
+Step 3의 기반 리소스부터 Step 7의 수동 복구 제어까지 한 state로 관리합니다. 상세 설명은 [STEP4.md](STEP4.md), [STEP5.md](STEP5.md), [STEP6.md](STEP6.md), [STEP7.md](STEP7.md)에 있습니다.
 
 ## 현재 배포 상태
 
-2026-08-27에 Step 3~6을 포트폴리오용 개발 계정의 서울 리전에 실제 적용했습니다. Step 6은 기존 리소스 변경·삭제 없이 14개를 추가하고 SNS→SQS 실제 수신을 통과했습니다. 공개 저장소에는 계정 ID와 리소스 ID를 기록하지 않습니다. 세부 검증은 [VERIFICATION.md](VERIFICATION.md)에 있습니다.
+2026-08-27에 Step 3~7을 포트폴리오용 개발 계정의 서울 리전에 실제 적용했습니다. Step 7은 복구 작업 테이블·운영자 역할·정책 3개를 추가하고, 통제된 분석 장애에서 원본 누락 0건과 Athena 복구 RTO 86초를 관찰했습니다. 공개 저장소에는 계정 ID와 리소스 ID를 기록하지 않습니다. 세부 검증은 [VERIFICATION.md](VERIFICATION.md)에 있습니다.
 
 Terraform state는 현재 이 개인 실습 환경의 로컬 파일에만 있으며 Git에서 제외되고 파일 권한은 `600`입니다. 팀 협업·CI/CD·재해 복구가 필요한 단계에서는 잠금이 있는 원격 backend로 이전해야 하지만, Step 3 개인 실습에는 추가하지 않았습니다.
 
@@ -26,6 +26,9 @@ Terraform state는 현재 이 개인 실습 환경의 로컬 파일에만 있으
 - Glue JSON external table과 10 MiB 스캔 상한의 Athena workgroup
 - API·Lambda·DynamoDB·Pipe·Firehose·DLQ CloudWatch 알람 8개
 - SNS 알림 토픽, SSE-SQS 증거 큐, 월 US$20 actual/forecast Budget 알림
+- 삭제 보호·PITR·10 요청 단위 상한의 RecoveryJobs 제어 테이블
+- Query·초당 1건 Firehose·제한된 S3/Athena 권한만 가진 복구 운영자 역할
+- 단일 작업 잠금, 알람 일시정지, S3 checkpoint를 사용하는 수동 복구 도구
 
 NAT, EKS, Redis, Kinesis Data Streams, Glue ETL, Lake Formation, 고객 관리 KMS 키, VPC Flow Logs, 별도 CloudTrail Trail, Shield Advanced는 추가하지 않습니다.
 

@@ -194,7 +194,7 @@ resource "aws_athena_workgroup" "analytics" {
     bytes_scanned_cutoff_per_query     = 10485760
 
     result_configuration {
-      output_location = "s3://${aws_s3_bucket.data["athena-results"].id}/step5/"
+      output_location = "s3://${aws_s3_bucket.data["athena-results"].id}/${local.athena_result_prefix}/"
 
       encryption_configuration {
         encryption_option = "SSE_S3"

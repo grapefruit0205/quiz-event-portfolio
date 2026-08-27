@@ -1,6 +1,6 @@
 {
   "project": "quiz-event-portfolio",
-  "scope": "step-1-through-6-monitoring-deployed",
+  "scope": "step-1-through-7-recovery-deployed",
   "deployment_enabled": true,
   "account_id": null,
   "account_id_verified_locally": true,
@@ -62,7 +62,7 @@
   },
   "step4_post_apply_plan": "no-changes",
   "step4_live_api_status": "passed",
-  "deployed_scope": "step3-foundation-step4-api-step5-analysis-and-step6-monitoring",
+  "deployed_scope": "step3-foundation-step4-api-step5-analysis-step6-monitoring-and-step7-recovery",
   "plan_status": "complete-for-step-1",
   "plan_values_status": "approved-and-used-for-step3-apply",
   "current_goal_requires_deployment_approval": false,
@@ -91,5 +91,17 @@
   "step6_first_apply_issue": "sns-policy-action-scope-corrected-before-resume",
   "step6_budget_status": "monthly-usd20-actual80-forecast100",
   "step6_live_notification_status": "passed-cloudwatch-sns-sqs-and-reset",
-  "step6_post_apply_plan": "no-changes"
+  "step6_post_apply_plan": "no-changes",
+  "step7_iac_status": "implemented-and-verified",
+  "step7_actual_apply": {
+    "add": 3,
+    "change": 0,
+    "destroy": 0,
+    "applied_at": "2026-08-27T13:04:53+09:00"
+  },
+  "step7_least_privilege_corrections": "two-in-place-recovery-role-policy-updates-no-destroy",
+  "step7_live_recovery_status": "passed-gap-pause-lock-checkpoint-resume-s3-athena",
+  "step7_observed_source_rpo_events": 0,
+  "step7_observed_analysis_recovery_rto_seconds": 86,
+  "step7_post_apply_plan": "no-changes"
 }

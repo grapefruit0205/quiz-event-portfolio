@@ -187,6 +187,17 @@ variable "monthly_budget_usd" {
   }
 }
 
+variable "recovery_jobs_max_request_units" {
+  description = "복구 제어 테이블의 온디맨드 최대 읽기·쓰기 요청 단위"
+  type        = number
+  default     = 10
+
+  validation {
+    condition     = var.recovery_jobs_max_request_units >= 1 && var.recovery_jobs_max_request_units <= 20 && floor(var.recovery_jobs_max_request_units) == var.recovery_jobs_max_request_units
+    error_message = "복구 제어 테이블 최대 요청 단위는 1~20 정수여야 합니다."
+  }
+}
+
 variable "additional_tags" {
   description = "기본 태그에 추가할 사용자 태그"
   type        = map(string)

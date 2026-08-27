@@ -251,4 +251,23 @@ run "step4_guardrails" {
     )
     error_message = "월 US$20 기본 COST Budget이 필요합니다."
   }
+
+  assert {
+    condition = (
+      aws_dynamodb_table.recovery_jobs.billing_mode == "PAY_PER_REQUEST" &&
+      aws_dynamodb_table.recovery_jobs.deletion_protection_enabled &&
+      aws_dynamodb_table.recovery_jobs.point_in_time_recovery[0].enabled &&
+      aws_dynamodb_table.recovery_jobs.on_demand_throughput[0].max_read_request_units == 10 &&
+      aws_dynamodb_table.recovery_jobs.on_demand_throughput[0].max_write_request_units == 10
+    )
+    error_message = "복구 작업 테이블은 삭제 보호·PITR과 10 요청 단위 상한이 필요합니다."
+  }
+
+  assert {
+    condition = (
+      jsondecode(aws_iam_role.recovery_operator.assume_role_policy).Statement[0].Principal.AWS == "arn:aws:iam::123456789012:user/terraform-test" &&
+      aws_iam_role.recovery_operator.tags.Portfolio == "step-7"
+    )
+    error_message = "복구 역할은 배포 운영자만 맡을 수 있어야 합니다."
+  }
 }

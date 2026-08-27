@@ -1,4 +1,4 @@
-# Step 3~6 배포·구현 검증 기록
+# Step 3~7 배포·구현 검증 기록
 
 2026-08-27 · observed · Terraform 1.15.8 / hashicorp/aws 6.62.0 / AWS CLI 2.36.32
 
@@ -11,6 +11,8 @@ Step 4의 DynamoDB 어댑터·Lambda·IAM 인증 API·WAF를 `23 added / 3 chang
 Step 5의 Pipes·Firehose·S3·Glue·Athena를 리소스 12개 추가로 적용했다. 첫 내용 검증에서 여러 줄 JSON 문제를 발견해 기존 객체 삭제 없이 세 리소스를 제자리 수정했고, 두 번째 라이브 이벤트의 원본·S3·Athena 내용 대조와 무변경 재계획을 통과했다.
 
 Step 6의 CloudWatch 알람 8개, SNS·SQS 증거 경로, 월 US$20 Budget을 기존 리소스 변경·삭제 없이 14개 추가했다. 고유 시험 알람이 SNS를 거쳐 암호화 SQS에 도착하고 알람이 정상 상태로 복귀한 것을 확인했다.
+
+Step 7의 RecoveryJobs·복구 운영자 역할·정책 3개를 추가했다. 통제된 Pipe 장애에서 누락 범위를 찾고 알람 일시정지, 동시 작업 거부, checkpoint 중단·재개, S3·Athena 복원을 통과했다.
 
 ## 수행한 검사
 
@@ -59,6 +61,23 @@ Step 6의 CloudWatch 알람 8개, SNS·SQS 증거 경로, 월 US$20 Budget을 �
 | 시험 후 상태 | pass | 대상 알람 OK 복귀, 증거 메시지 미삭제 |
 | 시험 범위 | 제한 명시 | 실제 과부하가 아니라 `SetAlarmState`로 action 경로만 검증 |
 
+## Step 7 제한 속도 복구 검사
+
+| 검사 | 판정 | 실제 관찰 |
+| --- | --- | --- |
+| 최초 실제 apply | pass | `3 added / 0 changed / 0 destroyed` |
+| 최소 권한 보정 | pass | 실제 Athena 오류로 확인한 raw/result prefix만 두 차례 제자리 정책 수정, 삭제 0 |
+| 통제 장애와 업무 RPO | pass | Pipe STOPPED 중 API 2건 성공, Events 원본 누락 0건 |
+| 누락 식별 | pass | 같은 사용자·시간 범위의 source 2건 / Athena 0건과 event ID 특정 |
+| API 보호 | pass | 시험 ALARM 중 처리 0건 `PAUSED`, 자동 재개 없음 |
+| 동시 작업 | pass | 첫 작업 잠금 중 두 번째 resume 거부 |
+| checkpoint | pass | 1건 처리 후 중단 상태와 진행 위치 저장 |
+| 운영자 재개 | pass | 확인 문자열 후 총 2건 완료, 잠금 해제 |
+| 수동 경로 증명 | pass | Pipe STOPPED 상태에서 S3 두 레코드의 manual-recovery 표식 확인 |
+| 복원 완료 | pass | Athena 재대조 누락 0건, Pipe RUNNING 복귀 |
+| 분석 복구 RTO | observed | 운영자 resume부터 Athena 복원 확인까지 86초 |
+| 회귀 테스트 | pass | 복구 Python 테스트 5개, `Z`/`+00:00` 동등 시각 포함 |
+
 ## Step 4 apply 전 검사
 
 | 검사 | 판정 | 실제 관찰 |
@@ -84,8 +103,8 @@ Step 6의 CloudWatch 알람 8개, SNS·SQS 증거 경로, 월 US$20 Budget을 �
 - WAF/API Gateway/Lambda/DynamoDB의 실제 과부하·throttling 유발
 - DynamoDB PITR 복원 시간과 복원 데이터 내용
 - S3 객체 버전 복구와 실제 청구 비용
-- 24시간을 넘긴 분석 누락의 제한 속도 재전송과 중단·재개
+- 실제로 24시간 이상 경과한 대량 이력의 장시간 재전송
 - 리전 전체 장애 복구와 원격 Terraform state 복구
 - 부트스트랩 배포 사용자의 MFA 등록과 `PowerUserAccess`를 전용 배포 역할로 축소하는 작업
 
-API·분석·알림의 Step 4~6 검증을 완료했다. 현재 리소스는 비용이 발생할 수 있으므로 실습 종료 시 [README.md](README.md)의 보호 해제·destroy 절차를 따른다.
+API·분석·알림·제한 속도 복구의 Step 4~7 검증을 완료했다. 현재 리소스는 비용이 발생할 수 있으므로 실습 종료 시 [README.md](README.md)의 보호 해제·destroy 절차를 따른다.

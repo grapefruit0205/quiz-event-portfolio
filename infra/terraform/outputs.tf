@@ -92,3 +92,23 @@ output "monitoring" {
     }
   }
 }
+
+output "recovery" {
+  value = {
+    jobs_table_name   = aws_dynamodb_table.recovery_jobs.name
+    operator_role_arn = aws_iam_role.recovery_operator.arn
+    recovery_bucket   = aws_s3_bucket.data["recovery"].id
+    events_table_name = aws_dynamodb_table.events.name
+    firehose_name     = aws_kinesis_firehose_delivery_stream.events.name
+    athena_workgroup  = aws_athena_workgroup.analytics.name
+    glue_database     = aws_glue_catalog_database.analytics.name
+    glue_table        = aws_glue_catalog_table.quiz_events.name
+    pause_alarm_names = [
+      aws_cloudwatch_metric_alarm.api_high_requests.alarm_name,
+      aws_cloudwatch_metric_alarm.lambda_high_concurrency.alarm_name,
+      aws_cloudwatch_metric_alarm.lambda_throttles.alarm_name,
+      aws_cloudwatch_metric_alarm.dynamodb_write_throttles["players"].alarm_name,
+      aws_cloudwatch_metric_alarm.dynamodb_write_throttles["events"].alarm_name,
+    ]
+  }
+}

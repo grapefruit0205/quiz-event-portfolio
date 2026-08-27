@@ -1,6 +1,7 @@
 locals {
-  resource_prefix = "${var.project_name}-${var.environment}"
-  bucket_prefix   = substr(local.resource_prefix, 0, 20)
+  resource_prefix      = "${var.project_name}-${var.environment}"
+  bucket_prefix        = substr(local.resource_prefix, 0, 20)
+  athena_result_prefix = "step5"
   operator_principal_arn = (
     var.operator_principal_arn != null
     ? var.operator_principal_arn
