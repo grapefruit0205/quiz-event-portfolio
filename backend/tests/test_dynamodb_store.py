@@ -1,11 +1,11 @@
 import json
 import unittest
 
-from quiz_backend.quiz import ApiError, grade, validate_submission
+from quiz_backend.quiz import ApiError, QUIZ_ID, grade, validate_submission
 from quiz_backend.storage import DynamoDBStore, _plain_item
 
 
-ANSWERS = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1]
+ANSWERS = [2, 0, 3, 1, 2, 0, 1, 3, 0, 2]
 NOW = "2026-08-27T01:02:03.004Z"
 
 
@@ -66,7 +66,7 @@ class DynamoDBStoreTests(unittest.TestCase):
     def submission(self, event_id="event-001", version=0, answers=None):
         return validate_submission({
             "event_id": event_id,
-            "quiz_id": "math-v1",
+            "quiz_id": QUIZ_ID,
             "expected_version": version,
             "answers": ANSWERS.copy() if answers is None else answers,
             "test_run_id": "ddb-unit",

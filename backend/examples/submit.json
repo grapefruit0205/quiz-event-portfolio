@@ -1,7 +1,7 @@
 {
   "event_id": "round-001",
-  "quiz_id": "math-v1",
+  "quiz_id": "aws-sap-architecture-v1",
   "expected_version": 0,
-  "answers": [0, 1, 2, 3, 0, 1, 2, 0, 1, 0],
+  "answers": [2, 0, 3, 1, 2, 0, 1, 0, 1, 3],
   "test_run_id": "manual-001"
 }

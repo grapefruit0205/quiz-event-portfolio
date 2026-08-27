@@ -8,7 +8,9 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 import uuid
 
-DEMO_ANSWERS = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1]  # Public fixture, not an API answer-key leak.
+from .quiz import QUIZ_ID
+
+DEMO_ANSWERS = [2, 0, 3, 1, 2, 0, 1, 3, 0, 2]  # Public fixture, not an API answer-key leak.
 
 
 def request(base_url, method, path, body=None, user="alice"):
@@ -40,11 +42,11 @@ def run(base_url: str) -> dict:
 
     status, quiz = request(base_url, "GET", "/quiz")
     check("문제 10개 조회, 정답 필드 없음", status == 200 and len(quiz["questions"]) == 10
-          and all(set(q) == {"question_id", "text", "choices"} for q in quiz["questions"]))
+          and all(set(q) == {"question_id", "domain", "text", "choices"} for q in quiz["questions"]))
     status, before = request(base_url, "GET", "/players/alice")
     check("내 현재 버전 조회", status == 200)
     run_id = "demo-" + uuid.uuid4().hex[:12]
-    body = {"event_id": run_id, "quiz_id": "math-v1", "expected_version": before["version"],
+    body = {"event_id": run_id, "quiz_id": QUIZ_ID, "expected_version": before["version"],
             "answers": DEMO_ANSWERS, "test_run_id": run_id}
     status, saved = request(base_url, "POST", "/players/alice/results", body)
     check("서버 채점·새 제출", status == 201 and saved["score"] == 100 and saved["version"] == before["version"] + 1)

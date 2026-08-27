@@ -1,8 +1,8 @@
-# Step 1·2 — 로컬 퀴즈 백엔드
+# Step 1·2 + Step 9 — 로컬 퀴즈 백엔드와 UI
 
 **대상: SAA 합격 후 첫 구현. AWS 계정·키·Docker·추가 Python 패키지가 필요하지 않습니다.**
 
-10문제 퀴즈의 답안을 서버가 채점하고, 현재 점수와 플레이 이력을 저장합니다. 로컬 실행은 Python 표준 라이브러리와 SQLite를 사용합니다. Step 4~7에서 AWS API, 분석, 알림, 제한 속도 복구를 순서대로 검증했습니다.
+AWS SAP 아키텍처 10문제의 답안을 서버가 채점하고, 현재 점수와 플레이 이력을 저장합니다. 로컬 실행은 Python 표준 라이브러리·SQLite·HTML/CSS/JavaScript만 사용합니다. Step 4~7에서 AWS API, 분석, 알림, 제한 속도 복구를 순서대로 검증했습니다.
 
 ## 1. 먼저 테스트
 
@@ -24,7 +24,7 @@ backend 폴더에서:
 python3 -m quiz_backend.local_server
 ```
 
-`local_server_ready`와 `http://127.0.0.1:8765`가 표시됩니다. 서버는 계속 실행되며 Ctrl+C로 종료합니다. DB는 `.local/quiz.sqlite3`에 저장됩니다. 같은 파일로 재시작하면 기존 결과가 남습니다.
+`local_server_ready`와 `http://127.0.0.1:8765`가 표시됩니다. 해당 주소를 브라우저에서 열면 Step 9 퀴즈 UI가 나타납니다. 서버는 계속 실행되며 Ctrl+C로 종료합니다. DB는 `.local/quiz.sqlite3`에 저장됩니다. 같은 파일로 재시작하면 기존 결과가 남습니다.
 
 포트가 사용 중이라면 `--port 8766`으로 실행하고 아래 클라이언트에도 같은 포트를 지정하세요. 새 데이터로 연습하려면 `--db .local/another-run.sqlite3`를 사용하세요. 기존 DB를 지울 필요가 없습니다.
 
@@ -87,8 +87,9 @@ curl -sS -i http://127.0.0.1:8765/players/bob -H 'Authorization: Bearer local-al
 - [Step 1 명세·배포 계획](docs/STEP1.md): 완료된 계획과 Step 3 전 별도 승인 Gate.
 - [API 계약](docs/API.md): 본문·상태 코드·데이터 계약.
 - [검증 기록](docs/VERIFICATION.md): 실제 실행한 검사와 미실행 범위.
+- [Step 9 로컬 SAP 퀴즈 UI](docs/STEP9.md): 화면 흐름, guardrail, 실제 브라우저 증거.
 - [배포 계획 JSON](config/deployment-plan.json): deployment_enabled=false. **배포 스크립트가 아닙니다.**
 
 과거 v5 설계의 ScoreChanged/schema 1 대신 이 로컬 예제는 QuizCompleted/schema 2를 사용합니다. 배포된 데이터는 없으며 마이그레이션은 하지 않았습니다. 미래 Catalog/검증기도 이 계약에 맞춰야 합니다.
 
-이 로컬 HTTP 서버는 127.0.0.1 전용입니다. 인터넷 공개·터널링·실사용자 데이터 입력을 하지 마세요. 공개 웹 UI는 없습니다. 실제 AWS 검증은 [Step 4](../infra/terraform/STEP4.md), [Step 5](../infra/terraform/STEP5.md), [Step 6](../infra/terraform/STEP6.md), [Step 7](../infra/terraform/STEP7.md)에 있습니다.
+이 로컬 HTTP 서버와 UI는 127.0.0.1 전용입니다. 인터넷 공개·터널링·실사용자 데이터 입력을 하지 마세요. Cognito나 공개 웹 배포는 없습니다. 실제 AWS 검증은 [Step 4](../infra/terraform/STEP4.md), [Step 5](../infra/terraform/STEP5.md), [Step 6](../infra/terraform/STEP6.md), [Step 7](../infra/terraform/STEP7.md)에 있습니다.

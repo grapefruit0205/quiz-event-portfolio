@@ -2,7 +2,7 @@
 
 ## 프로젝트 한 줄 설명
 
-작은 퀴즈 게임의 점수와 불변 이벤트를 안전하게 저장하고, 분석 전달 장애를 탐지·복구하며, 서비스 한도와 비용 알림까지 실제 AWS에서 증명한 단일 리전 서버리스 포트폴리오입니다.
+AWS SAP 아키텍처 퀴즈를 로컬에서 실제로 플레이하고, 점수와 불변 이벤트의 안전한 저장부터 분석 전달 장애 탐지·복구, 서비스 한도와 비용 알림까지 실제 AWS에서 증명한 단일 리전 서버리스 포트폴리오입니다.
 
 ## 아키텍처
 
@@ -63,6 +63,8 @@ flowchart LR
 
 API Gateway와 WAF는 VPC 밖의 관리형 서비스입니다. Lambda만 두 비공개 서브넷에 연결되며, NAT/Internet Gateway 없이 DynamoDB Gateway Endpoint를 사용합니다.
 
+Step 9의 HTML/CSS/JavaScript 화면은 이 AWS 도면에 추가된 공개 클라이언트가 아니라 `127.0.0.1` 전용 실습 UI입니다. 같은 서버 채점·점수 조회 계약을 SQLite로 체험하게 하되, IAM 역할 기반 AWS API와 연결하거나 Cognito를 추가하지 않았습니다.
+
 ## 실제 게임 흐름으로 설명하기
 
 ### 1. 플레이어가 퀴즈를 제출한다
@@ -85,6 +87,7 @@ RecoveryJobs에 GSI cursor와 처리 수를 저장하고 versioned S3에도 진�
 
 | 질문 | 구현 | 실제 증거 |
 | --- | --- | --- |
+| 퀴즈를 실제로 플레이할 수 있는가? | 로컬 SAP 10문제 UI + 서버 채점 | 실제 브라우저 100점 저장·새로고침 유지 |
 | 다른 사용자 접근을 막았는가? | IAM 호출 역할 + Lambda 소유권 검사 | Alice→Bob 403 |
 | 상태와 이력이 함께 저장되는가? | DynamoDB 거래 | 신규 201·재시도 200·충돌 409 |
 | 분석 내용이 원본과 같은가? | Streams→Pipes→Firehose→S3→Athena | ID·hash·본문 대조 통과 |
@@ -114,11 +117,11 @@ EKS, Redis, Kinesis Data Streams, NAT Gateway, Glue ETL, Lake Formation, 다중 
 
 ## 면접에서 5분 설명 순서
 
-1. 퀴즈 제출 한 건이 WAF→API→Lambda→DynamoDB 거래로 흐르는 과정을 설명합니다.
-2. 현재 상태와 불변 이벤트를 분리한 이유를 `10→20→30` 예시로 말합니다.
-3. 분석 Pipe 장애가 API 장애가 아닌 이유와 Events 원본의 역할을 설명합니다.
-4. 실제로 찾은 결함을 말합니다: 여러 줄 NDJSON, UTC 표기 비교, Athena 최소 권한 prefix, checkpoint 조건식.
-5. RPO 0건·RTO 86초가 통제 실험의 관찰값일 뿐 다중 리전 보장이 아니라고 경계를 설명합니다.
+1. 로컬 UI에서 10문제를 제출해 점수가 저장되는 모습을 보여준 뒤, 이 체험 경로와 실제 AWS IAM API 증거를 구분합니다.
+2. 퀴즈 제출 한 건이 WAF→API→Lambda→DynamoDB 거래로 흐르는 과정을 설명합니다.
+3. 현재 상태와 불변 이벤트를 분리한 이유를 `10→20→30` 예시로 말합니다.
+4. 분석 Pipe 장애가 API 장애가 아닌 이유와 Events 원본의 역할을 설명합니다.
+5. 실제로 찾은 결함과 경계를 말합니다: 여러 줄 NDJSON·UTC 비교·checkpoint 조건식, 그리고 RPO 0건·RTO 86초는 작은 통제 실험의 관찰값입니다.
 
 ## 문서와 실행 경로
 
@@ -127,4 +130,5 @@ EKS, Redis, Kinesis Data Streams, NAT Gateway, Glue ETL, Lake Formation, 다중 
 - [알람·비용](infra/terraform/STEP6.md)
 - [제한 속도 복구](infra/terraform/STEP7.md)
 - [최종 통합 검증](infra/terraform/STEP8.md)
+- [로컬 SAP 퀴즈 UI](backend/docs/STEP9.md)
 - [전체 실행 기록](infra/terraform/VERIFICATION.md)

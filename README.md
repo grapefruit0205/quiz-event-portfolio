@@ -12,8 +12,9 @@
 - **Step 6:** API·Lambda·DynamoDB·분석 경로 알람, Budget, 실제 SNS 알림 수신
 - **Step 7:** 누락 범위 식별, 초당 1건 수동 복구, 알람 일시정지와 checkpoint 재개
 - **Step 8:** API·분석·알림·복구 증거의 최종 통합 검증
+- **Step 9:** 로컬 AWS SAP 아키텍처 10문제 UI, 서버 채점과 최근 점수 표시
 
-Step 3~7은 포트폴리오용 개발 계정의 서울 리전에 배포되어 있고 Step 8 통합 검증까지 완료했습니다. 실제 IAM 서명 요청, 데이터 원본→S3→Athena 내용 일치, 알림 수신, 통제된 분석 장애의 중단·재개 복구를 확인했습니다. 로컬 SQLite 모드도 독립 실행할 수 있습니다.
+Step 3~7은 포트폴리오용 개발 계정의 서울 리전에 배포되어 있고 Step 8 통합 검증까지 완료했습니다. 실제 IAM 서명 요청, 데이터 원본→S3→Athena 내용 일치, 알림 수신, 통제된 분석 장애의 중단·재개 복구를 확인했습니다. Step 9에서는 AWS 리소스를 추가하지 않고 로컬 SQLite 백엔드에 실제 플레이 가능한 SAP 아키텍처 퀴즈 UI를 연결했습니다.
 
 ## 빠른 실행
 
@@ -24,6 +25,8 @@ cd backend
 python3 -m unittest discover -s tests -v
 python3 -m quiz_backend.local_server
 ```
+
+브라우저에서 `http://127.0.0.1:8765`를 열면 10문제 퀴즈를 풀고 점수를 확인할 수 있습니다.
 
 다른 터미널에서 실제 HTTP 시나리오를 실행합니다.
 
@@ -46,10 +49,11 @@ python3 -m quiz_backend.demo
 - [Step 6 선제 모니터링·비용 알림](infra/terraform/STEP6.md)
 - [Step 7 제한 속도 수동 복구](infra/terraform/STEP7.md)
 - [Step 8 최종 통합 검증](infra/terraform/STEP8.md)
+- [Step 9 로컬 SAP 퀴즈 UI](backend/docs/STEP9.md)
 
 ## 검증 결과
 
-- 자동 테스트 38개 통과
+- 자동 테스트 40개 통과
 - 정상 채점과 상태·이력 거래 저장
 - 잘못된 입력과 저장 실패 롤백
 - 같은 요청의 안전한 재시도와 ID 충돌 거부
@@ -66,5 +70,6 @@ python3 -m quiz_backend.demo
 - Step 6 리소스 14개 추가, 8개 알람·Budget·SNS→SQS 라이브 알림 수신 통과
 - Step 7 통제 장애에서 원본 누락 0건, checkpoint 재개, Athena 복구 RTO 86초 관찰
 - Step 8 전체 통합 검증 139초, 실제 AWS 최종 plan 무변경
+- Step 9 실제 브라우저에서 10문제 제출·100점 저장·새로고침 유지·콘솔 오류 0건
 
-VPC부터 제한 속도 복구까지 실제 AWS 상태와 호출로 확인했습니다. 실제 과부하와 리전 장애는 의도적으로 유발하지 않았습니다. IAM 사용자 MFA 등록과 광범위한 부트스트랩 권한 축소는 보안 부채로 남겨 두었습니다.
+VPC부터 제한 속도 복구까지 실제 AWS 상태와 호출로 확인했습니다. 실제 과부하와 리전 장애는 의도적으로 유발하지 않았습니다. IAM 사용자 MFA 등록과 광범위한 부트스트랩 권한 축소는 보안 부채로 남겨 두었습니다. Step 9는 로컬 전용이며 Cognito·공개 웹 호스팅·AWS apply는 포함하지 않습니다.

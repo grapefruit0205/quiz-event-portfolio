@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="AWS SAP 아키텍처 판단을 연습하는 로컬 10문제 퀴즈">
+  <title>AWS SAP Architecture Lab</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">LOCAL ARCHITECTURE PRACTICE</p>
+        <h1>AWS SAP<br><span>Architecture Lab</span></h1>
+        <p class="hero-copy">서비스 이름보다 요구사항, 실패 범위, 운영 부담을 먼저 읽는 10문제입니다.</p>
+      </div>
+      <section class="score-panel" aria-labelledby="latest-title">
+        <div class="score-panel-heading">
+          <p id="latest-title">최근 기록</p>
+          <span class="local-badge">ALICE · LOCAL</span>
+        </div>
+        <strong id="latest-score">—</strong>
+        <p id="latest-detail">서버 기록을 불러오는 중입니다.</p>
+      </section>
+    </header>
+
+    <section class="notice" aria-label="실습 범위">
+      <span class="notice-dot"></span>
+      <p><strong>AWS 미연결 실습</strong> · 이 화면은 127.0.0.1의 SQLite 백엔드만 사용하며 IAM 키를 요구하지 않습니다.</p>
+    </section>
+
+    <section class="toolbar" aria-label="퀴즈 진행 상황">
+      <div>
+        <p class="toolbar-label">ANSWERED</p>
+        <strong><span id="answered-count">0</span> / 10</strong>
+      </div>
+      <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
+      <p id="save-state" class="save-state" role="status" aria-live="polite">문제를 불러오는 중입니다.</p>
+    </section>
+
+    <form id="quiz-form" hidden novalidate>
+      <div id="questions" class="questions"></div>
+      <section class="submit-panel">
+        <div>
+          <p class="toolbar-label">SERVER-SIDE GRADING</p>
+          <h2>아키텍처 결정을 제출할까요?</h2>
+          <p>10개 답안을 모두 선택하면 서버가 채점하고 최신 점수와 이벤트를 한 트랜잭션으로 저장합니다.</p>
+        </div>
+        <button id="submit-button" class="primary-button" type="submit" disabled>
+          <span>답안 제출</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </section>
+    </form>
+
+    <section id="result-panel" class="result-panel" hidden aria-labelledby="result-title">
+      <p class="eyebrow">RESULT STORED</p>
+      <div class="result-layout">
+        <div>
+          <h2 id="result-title">채점이 완료됐습니다.</h2>
+          <p id="result-message"></p>
+        </div>
+        <div class="result-score"><strong id="result-score">0</strong><span>점</span></div>
+      </div>
+      <div class="result-meta">
+        <span id="result-correct">0 / 10 정답</span>
+        <span id="result-version">기록 #0</span>
+        <span id="result-time">—</span>
+      </div>
+      <button id="retry-button" class="secondary-button" type="button">다시 도전</button>
+    </section>
+
+    <section id="fatal-error" class="fatal-error" hidden role="alert">
+      <h2>퀴즈를 시작하지 못했습니다.</h2>
+      <p id="fatal-message"></p>
+      <button id="reload-button" class="secondary-button" type="button">다시 불러오기</button>
+    </section>
+  </main>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

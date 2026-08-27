@@ -10,10 +10,10 @@ from unittest.mock import patch
 import quiz_backend.handler as handler_module
 from quiz_backend.handler import build_handler, lambda_handler
 from quiz_backend.local_server import LOCAL_PRINCIPALS
-from quiz_backend.quiz import MAX_BODY_BYTES, MAX_VERSION, content_hash
+from quiz_backend.quiz import MAX_BODY_BYTES, MAX_VERSION, QUIZ_ID, content_hash
 from quiz_backend.storage import SQLiteStore
 
-ANSWERS = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1]
+ANSWERS = [2, 0, 3, 1, 2, 0, 1, 3, 0, 2]
 NOW = "2026-08-27T01:02:03.004Z"
 
 
@@ -26,7 +26,7 @@ class BackendTests(unittest.TestCase):
         self.handler = build_handler(self.store, LOCAL_PRINCIPALS, clock=lambda: NOW)
 
     def submission(self, event_id="event-001", version=0):
-        return {"event_id": event_id, "quiz_id": "math-v1", "expected_version": version,
+        return {"event_id": event_id, "quiz_id": QUIZ_ID, "expected_version": version,
                 "answers": ANSWERS.copy(), "test_run_id": "unit-001"}
 
     def event(self, body=None, path="/players/alice/results", method="POST", principal="local:alice"):
@@ -47,7 +47,10 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(len(quiz["questions"]), 10)
         for q in quiz["questions"]:
-            self.assertEqual(set(q), {"question_id", "text", "choices"})
+            self.assertEqual(set(q), {"question_id", "domain", "text", "choices"})
+            self.assertTrue(q["domain"])
+            self.assertEqual(len(q["choices"]), 4)
+            self.assertTrue(all(isinstance(choice, str) and choice for choice in q["choices"]))
 
     def test_new_player_read_has_no_write_side_effect(self):
         status, player = self.call(path="/players/alice", method="GET")

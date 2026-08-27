@@ -1,4 +1,4 @@
-# Step 1 API 계약 — quiz schema 2
+# 현재 API 계약 — quiz schema 2
 
 기본 주소: `http://127.0.0.1:8765`. 모든 요청은 로컬 테스트 사용자 선택을 위해 `Authorization: Bearer local-alice` 또는 `Bearer local-bob`를 사용한다. 이는 AWS 인증이 아니다.
 
@@ -8,7 +8,7 @@ Step 4 AWS 모드에서는 Terraform 출력 `api_invoke_url`이 기본 주소이
 
 | 요청 | 결과 |
 | --- | --- |
-| GET `/quiz` | quiz_id=math-v1, 문제 10개, 각 선택지 4개. 정답 인덱스는 반환하지 않음 |
+| GET `/quiz` | quiz_id=aws-sap-architecture-v1, 아키텍처 문제 10개, domain과 각 선택지 4개. 정답 인덱스는 반환하지 않음 |
 | GET `/players/alice` | Alice의 score/version/latest_result. Bob 토큰으로는 403 |
 | POST `/players/alice/results` | 아래 답안 제출. Content-Type: application/json 필요 |
 
@@ -19,20 +19,20 @@ Step 4 AWS 모드에서는 Terraform 출력 `api_invoke_url`이 기본 주소이
 ```json
 {
   "event_id": "round-001",
-  "quiz_id": "math-v1",
+  "quiz_id": "aws-sap-architecture-v1",
   "expected_version": 0,
-  "answers": [0, 1, 2, 3, 0, 1, 2, 0, 1, 0],
+  "answers": [2, 0, 3, 1, 2, 0, 1, 0, 1, 3],
   "test_run_id": "manual-001"
 }
 ```
 
-- 위 답안은 7개 정답이므로 서버가 70점으로 계산한다.
+- 위 답안은 7개 정답이므로 서버가 70점으로 계산한다. 정답 자체는 GET /quiz 응답에 포함되지 않는다.
 - answers는 문제 순서에 따른 **0부터 시작하는 선택지 번호** 10개다. 숫자 문자열·float·bool·null은 거부한다.
 - expected_version은 직전 내 상태 조회 결과다. 새로운 사용자는 0. 새 제출은 버전을 1 올린다.
 - event_id/test_run_id는 영숫자로 시작하는 영숫자/_/- 1~64자다. 새 플레이에는 새 event_id를 사용한다.
 - 재시도는 **원래 본문 전체를 그대로** 보낸다. expected_version도 임의로 최신값으로 바꾸지 않는다.
 - expected_version 범위는 0 이상, 2^53−1 미만이다. 추가 필드·누락 필드·중복 JSON 키·NaN/Infinity·16 KiB 초과를 거부한다.
-- 쿼리 파라미터는 지원하지 않는다. 문제은행 수정은 같은 math-v1을 덮어쓰지 않고 새 버전으로 한다.
+- 쿼리 파라미터는 지원하지 않는다. 문제은행 수정은 같은 aws-sap-architecture-v1을 덮어쓰지 않고 새 버전으로 한다.
 
 ## 성공 응답 예시
 
@@ -42,7 +42,7 @@ Step 4 AWS 모드에서는 Terraform 출력 `api_invoke_url`이 기본 주소이
 {
   "player_id": "alice",
   "event_id": "round-001",
-  "quiz_id": "math-v1",
+  "quiz_id": "aws-sap-architecture-v1",
   "score": 70,
   "correct_count": 7,
   "question_count": 10,

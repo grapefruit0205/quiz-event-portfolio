@@ -15,6 +15,16 @@ from .storage import SQLiteStore
 
 LOCAL_PRINCIPALS = {"local:alice": "alice", "local:bob": "bob"}
 LOCAL_TOKENS = {"Bearer local-alice": "local:alice", "Bearer local-bob": "local:bob"}
+WEB_DIR = Path(__file__).with_name("web")
+STATIC_ROUTES = {
+    "/": ("index.html", "text/html; charset=utf-8"),
+    "/assets/app.css": ("app.css", "text/css; charset=utf-8"),
+    "/assets/app.js": ("app.js", "text/javascript; charset=utf-8"),
+}
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'none'; "
+    "connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+)
 
 
 def make_server(db_path: str | Path, port: int = 8765):
@@ -30,16 +40,37 @@ def make_server(db_path: str | Path, port: int = 8765):
         def log_message(self, *_args):
             pass  # Application logs contain only generated IDs and outcome, not request headers.
 
-        def send_result(self, result):
-            data = result["body"].encode("utf-8")
-            self.send_response(result["statusCode"])
-            for name, value in result["headers"].items():
+        def send_bytes(self, status, data, headers):
+            self.send_response(status)
+            for name, value in headers.items():
                 self.send_header(name, value)
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Connection", "close")
             self.end_headers()
-            self.wfile.write(data)
+            if self.command != "HEAD":
+                self.wfile.write(data)
             self.close_connection = True
+
+        def send_result(self, result):
+            self.send_bytes(
+                result["statusCode"],
+                result["body"].encode("utf-8"),
+                result["headers"],
+            )
+
+        def send_static(self, filename, content_type):
+            try:
+                data = (WEB_DIR / filename).read_bytes()
+            except OSError as exc:
+                raise ApiError(503, "UI_UNAVAILABLE", "로컬 UI 파일을 읽을 수 없습니다.") from exc
+            self.send_bytes(200, data, {
+                "Content-Type": content_type,
+                "Cache-Control": "no-store",
+                "Content-Security-Policy": CONTENT_SECURITY_POLICY,
+                "Referrer-Policy": "no-referrer",
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+            })
 
         def dispatch(self):
             try:
@@ -47,8 +78,18 @@ def make_server(db_path: str | Path, port: int = 8765):
                 hosts = self.headers.get_all("Host", [])
                 if len(hosts) != 1 or hosts[0].lower() not in expected_hosts:
                     raise ApiError(403, "LOCAL_ONLY", "루프백 Host만 허용합니다.")
-                if self.headers.get("Origin") is not None:
-                    raise ApiError(403, "LOCAL_ONLY", "브라우저 Origin 요청은 이번 CLI 실습에서 허용하지 않습니다.")
+                expected_origins = {
+                    f"http://127.0.0.1:{self.server.server_port}",
+                    f"http://localhost:{self.server.server_port}",
+                }
+                origins = self.headers.get_all("Origin", [])
+                if len(origins) > 1 or (origins and origins[0].lower() not in expected_origins):
+                    raise ApiError(403, "LOCAL_ONLY", "같은 로컬 주소에서 시작한 브라우저 요청만 허용합니다.")
+                parsed = urlsplit(self.path)
+                static = STATIC_ROUTES.get(parsed.path)
+                if self.command in {"GET", "HEAD"} and not parsed.query and static is not None:
+                    self.send_static(*static)
+                    return
                 if self.headers.get("Transfer-Encoding") is not None:
                     raise ApiError(400, "INVALID_REQUEST", "Transfer-Encoding은 지원하지 않습니다.")
                 lengths = self.headers.get_all("Content-Length", [])
@@ -66,7 +107,6 @@ def make_server(db_path: str | Path, port: int = 8765):
                 body = data.decode("utf-8")
                 auth = self.headers.get_all("Authorization", [])
                 principal = LOCAL_TOKENS.get(auth[0]) if len(auth) == 1 else None
-                parsed = urlsplit(self.path)
                 event = {
                     "httpMethod": self.command, "path": parsed.path,
                     "headers": dict(self.headers.items()), "body": body,
@@ -83,6 +123,7 @@ def make_server(db_path: str | Path, port: int = 8765):
                 self.close_connection = True
 
         do_GET = dispatch
+        do_HEAD = dispatch
         do_POST = dispatch
         do_PUT = dispatch
         do_DELETE = dispatch
