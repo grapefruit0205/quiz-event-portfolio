@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+.local/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+.terraform/
+*.tfstate*
+*.tfvars
+.env
+
+# Codex 작업 기록과 과거 설계 산출물은 로컬에만 보관
+/memory/
+/work/
+/outputs/

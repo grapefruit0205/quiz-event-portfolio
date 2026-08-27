@@ -1,0 +1,50 @@
+{
+  "project": "quiz-event-portfolio",
+  "scope": "step-1-and-2-local-only",
+  "deployment_enabled": false,
+  "account_id": null,
+  "aws_region": {
+    "proposed": "ap-northeast-2",
+    "approved": true
+  },
+  "lab_duration_days": {
+    "proposed": 7,
+    "approved": true
+  },
+  "budget_usd": {
+    "proposed": 20,
+    "approved": true,
+    "is_cost_estimate": false,
+    "is_hard_spending_cap": false
+  },
+  "retention_days": {
+    "proposed": 14,
+    "approved": true,
+    "automatic_deletion_enabled": false
+  },
+  "runtime": "python3.12",
+  "future_iac": "terraform",
+  "future_api_type": "regional-rest-api",
+  "future_region_count": 1,
+  "local_storage": "sqlite-only-for-local-testing",
+  "future_storage": "dynamodb",
+  "future_analysis": [
+    "DynamoDB Streams",
+    "EventBridge Pipes",
+    "Firehose Direct PUT",
+    "S3",
+    "Athena"
+  ],
+  "deployment_approval": "not-granted",
+  "before_step3": [
+    "select and verify the AWS account",
+    "review expected cost and cleanup scope against the approved planning values",
+    "approve actual AWS deployment separately"
+  ],
+  "plan_status": "complete-for-step-1",
+  "plan_values_status": "approved-for-step-1-and-2",
+  "current_goal_requires_deployment_approval": false,
+  "activation_gate_status": "pending-before-step-3",
+  "planning_approval_scope": "documentation-and-local-implementation-only",
+  "planning_approved_at": "2026-08-27T08:56:14+09:00"
+}
