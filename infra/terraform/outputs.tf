@@ -63,3 +63,14 @@ output "caller_role_arns" {
 output "waf_web_acl_arn" {
   value = aws_wafv2_web_acl.api.arn
 }
+
+output "analysis_pipeline" {
+  value = {
+    pipe_name        = aws_pipes_pipe.events.name
+    firehose_name    = aws_kinesis_firehose_delivery_stream.events.name
+    dlq_url          = aws_sqs_queue.pipe_dlq.url
+    glue_database    = aws_glue_catalog_database.analytics.name
+    glue_table       = aws_glue_catalog_table.quiz_events.name
+    athena_workgroup = aws_athena_workgroup.analytics.name
+  }
+}

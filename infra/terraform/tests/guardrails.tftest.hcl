@@ -166,4 +166,48 @@ run "step4_guardrails" {
     )
     error_message = "Alice/Bob 역할은 배포 운영자만 assume할 수 있게 분리해야 합니다."
   }
+
+  assert {
+    condition = (
+      aws_sqs_queue.pipe_dlq.message_retention_seconds == 1209600 &&
+      aws_sqs_queue.pipe_dlq.sqs_managed_sse_enabled
+    )
+    error_message = "Pipe DLQ는 SQS 관리형 암호화와 14일 보관을 사용해야 합니다."
+  }
+
+  assert {
+    condition = (
+      aws_kinesis_firehose_delivery_stream.events.destination == "extended_s3" &&
+      aws_kinesis_firehose_delivery_stream.events.extended_s3_configuration[0].buffering_interval == 60 &&
+      aws_kinesis_firehose_delivery_stream.events.extended_s3_configuration[0].buffering_size == 1 &&
+      aws_kinesis_firehose_delivery_stream.events.extended_s3_configuration[0].compression_format == "GZIP" &&
+      startswith(aws_kinesis_firehose_delivery_stream.events.extended_s3_configuration[0].prefix, "raw/schema_version=2/format=ndjson/") &&
+      one(aws_kinesis_firehose_delivery_stream.events.extended_s3_configuration[0].processing_configuration[0].processors).type == "AppendDelimiterToRecord"
+    )
+    error_message = "Firehose는 Kinesis 없이 GZIP NDJSON을 S3에 직접 전달해야 합니다."
+  }
+
+  assert {
+    condition = (
+      aws_pipes_pipe.events.desired_state == "RUNNING" &&
+      aws_pipes_pipe.events.source_parameters[0].dynamodb_stream_parameters[0].starting_position == "LATEST" &&
+      aws_pipes_pipe.events.source_parameters[0].dynamodb_stream_parameters[0].batch_size == 10 &&
+      aws_pipes_pipe.events.source_parameters[0].dynamodb_stream_parameters[0].maximum_retry_attempts == 3 &&
+      aws_pipes_pipe.events.source_parameters[0].dynamodb_stream_parameters[0].maximum_record_age_in_seconds == 3600 &&
+      !strcontains(aws_pipes_pipe.events.target_parameters[0].input_template, "\n") &&
+      length(aws_pipes_pipe.events.source_parameters[0].dynamodb_stream_parameters[0].dead_letter_config) == 1
+    )
+    error_message = "Pipe는 LATEST부터 작은 batch·제한된 retry·SQS DLQ로 전달해야 합니다."
+  }
+
+  assert {
+    condition = (
+      aws_glue_catalog_table.quiz_events.table_type == "EXTERNAL_TABLE" &&
+      aws_glue_catalog_table.quiz_events.parameters.classification == "json" &&
+      aws_athena_workgroup.analytics.configuration[0].enforce_workgroup_configuration &&
+      aws_athena_workgroup.analytics.configuration[0].bytes_scanned_cutoff_per_query == 10485760 &&
+      aws_athena_workgroup.analytics.configuration[0].result_configuration[0].encryption_configuration[0].encryption_option == "SSE_S3"
+    )
+    error_message = "Glue JSON table과 10 MiB 스캔 상한·SSE-S3 결과의 Athena workgroup이 필요합니다."
+  }
 }

@@ -1,6 +1,6 @@
 {
   "project": "quiz-event-portfolio",
-  "scope": "step-1-through-4-api-deployed",
+  "scope": "step-1-through-5-analysis-deployed",
   "deployment_enabled": true,
   "account_id": null,
   "account_id_verified_locally": true,
@@ -62,11 +62,23 @@
   },
   "step4_post_apply_plan": "no-changes",
   "step4_live_api_status": "passed",
-  "deployed_scope": "step3-foundation-and-step4-api",
+  "deployed_scope": "step3-foundation-step4-api-and-step5-analysis",
   "plan_status": "complete-for-step-1",
   "plan_values_status": "approved-and-used-for-step3-apply",
   "current_goal_requires_deployment_approval": false,
   "activation_gate_status": "satisfied-for-step3-through-step8",
   "planning_approval_scope": "documentation-local-implementation-terraform-and-step3-through-step8-apply",
-  "planning_approved_at": "2026-08-27T08:56:14+09:00"
+  "planning_approved_at": "2026-08-27T08:56:14+09:00",
+  "step5_iac_status": "implemented-and-verified",
+  "step5_actual_apply": {
+    "add": 12,
+    "change": 3,
+    "destroy": 0,
+    "applied_at": "2026-08-27T12:11:50+09:00"
+  },
+  "step5_first_live_probe": "transport-succeeded-record-format-failed",
+  "step5_ndjson_fix": "in-place-prefix-template-and-catalog-update",
+  "step5_live_delivery_status": "passed-dynamodb-s3-athena-content-match",
+  "step5_pipe_dlq_status": "empty-after-live-verification",
+  "step5_post_apply_plan": "no-changes"
 }

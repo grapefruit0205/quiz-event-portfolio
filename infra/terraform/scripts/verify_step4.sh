@@ -3,6 +3,8 @@ set -euo pipefail
 
 profile="${AWS_PROFILE:-quiz-event-portfolio}"
 region="${AWS_REGION:-ap-northeast-2}"
+event_prefix="${LIVE_EVENT_PREFIX:-step4}"
+test_run_id="${LIVE_TEST_RUN_ID:-step4-live-check}"
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 terraform_dir="$(cd -- "${script_dir}/.." && pwd)"
 temp_dir="$(mktemp -d)"
@@ -78,8 +80,8 @@ version="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])' 
 status="$(signed_call ALICE GET /players/bob '' "${temp_dir}/cross.json" "${temp_dir}/cross.headers")"
 expect_status "Alice cannot read Bob" 403 "${status}"
 
-event_id="step4-$(date +%s)-$$"
-python3 - "${event_id}" "${version}" > "${temp_dir}/submission.json" <<'PY'
+event_id="${event_prefix}-$(date +%s)-$$"
+python3 - "${event_id}" "${version}" "${test_run_id}" > "${temp_dir}/submission.json" <<'PY'
 import json
 import sys
 
@@ -88,7 +90,7 @@ print(json.dumps({
     "quiz_id": "math-v1",
     "expected_version": int(sys.argv[2]),
     "answers": [0, 1, 2, 3, 0, 1, 2, 3, 0, 1],
-    "test_run_id": "step4-live-check",
+    "test_run_id": sys.argv[3],
 }, separators=(",", ":")))
 PY
 
@@ -129,4 +131,5 @@ expect_status "event id reuse with changed content rejected" 409 "${status}"
 status="$(signed_call BOB GET /players/bob '' "${temp_dir}/bob.json" "${temp_dir}/bob.headers")"
 expect_status "Bob reads own state" 200 "${status}"
 
+echo "LIVE_EVENT_ID=${event_id}"
 echo "Step 4 live API verification passed. Temporary credentials and responses were removed."
