@@ -1,0 +1,13 @@
+project_name = "quiz-event-portfolio"
+environment  = "lab"
+aws_region   = "ap-northeast-2"
+
+vpc_cidr = "10.40.0.0/16"
+private_subnet_cidrs = [
+  "10.40.1.0/24",
+  "10.40.2.0/24",
+]
+
+dynamodb_pitr_recovery_period_days   = 14
+dynamodb_deletion_protection_enabled = true
+allow_bucket_force_destroy           = false

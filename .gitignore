@@ -8,6 +8,8 @@ __pycache__/
 .terraform/
 *.tfstate*
 *.tfvars
+*.tfplan
+crash.log
 .env
 
 # Codex 작업 기록과 과거 설계 산출물은 로컬에만 보관

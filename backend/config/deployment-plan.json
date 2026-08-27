@@ -1,6 +1,6 @@
 {
   "project": "quiz-event-portfolio",
-  "scope": "step-1-and-2-local-only",
+  "scope": "step-1-through-3-iac",
   "deployment_enabled": false,
   "account_id": null,
   "aws_region": {
@@ -35,16 +35,24 @@
     "S3",
     "Athena"
   ],
-  "deployment_approval": "not-granted",
-  "before_step3": [
+  "deployment_approval": "not-granted-for-aws-apply",
+  "step3_iac_authorized": true,
+  "step3_iac_status": "implemented-and-locally-verified",
+  "step3_aws_apply_status": "not-run-no-development-credentials",
+  "step3_mock_plan": {
+    "add": 32,
+    "change": 0,
+    "destroy": 0
+  },
+  "before_aws_apply": [
     "select and verify the AWS account",
     "review expected cost and cleanup scope against the approved planning values",
     "approve actual AWS deployment separately"
   ],
   "plan_status": "complete-for-step-1",
-  "plan_values_status": "approved-for-step-1-and-2",
-  "current_goal_requires_deployment_approval": false,
-  "activation_gate_status": "pending-before-step-3",
-  "planning_approval_scope": "documentation-and-local-implementation-only",
+  "plan_values_status": "approved-for-step3-iac-not-aws-apply",
+  "current_goal_requires_deployment_approval": true,
+  "activation_gate_status": "pending-development-account-auth-before-aws-apply",
+  "planning_approval_scope": "documentation-local-implementation-and-terraform-iac",
   "planning_approved_at": "2026-08-27T08:56:14+09:00"
 }
