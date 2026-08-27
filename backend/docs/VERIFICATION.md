@@ -1,10 +1,12 @@
-# Step 1·2 검증 기록
+# Step 1·2 로컬 + Step 4 AWS 어댑터 검증 기록
 
 2026-08-27 · observed · Python 3.12.3 / SQLite 3.45.1
 
 ## 원래 목표와 현재 결과
 
-Step 1의 구현 명세/배포 계획과 Step 2의 로컬 백엔드를 만든다는 목표에 맞는 산출물이다. **Step 1 계획 작성과 Step 2 로컬 구현·검증을 완료했다.** 사용자 소유 배포 승인은 Step 3 전 Gate이며 이번 범위가 아니다. AWS에 배포된 서비스가 있다고 주장하지 않는다.
+Step 1의 구현 명세/배포 계획과 Step 2의 로컬 백엔드를 만든다는 목표에 맞는 산출물이다. **Step 1 계획 작성과 Step 2 로컬 구현·검증을 완료했다.** 이후 Step 3 기반은 실제 배포됐으며 그 증거는 Terraform 검증 문서에 분리했다.
+
+이후 Step 4의 DynamoDB 저장 어댑터와 Lambda 환경 연결을 추가했다. 2026-08-27 전체 자동 테스트는 38개가 통과했다. 이 결과는 AWS SDK 호출 모형을 이용한 코드 검증이며 실제 DynamoDB 거래 성공 증거는 아니다.
 
 ## 수행한 검사
 
@@ -23,8 +25,18 @@ Step 1의 구현 명세/배포 계획과 Step 2의 로컬 백엔드를 만든다
 | AWS와 로컬 경계 | pass | AWS 진입점은503으로 거부, Lambda 환경에서 로컬 서버 생성 거부, 루프백 Host/Origin 제한 |
 | 독립 실행 | pass | 별도 검토자가 README 테스트·서버·데모·curl·재시작을 실행. 정상201/70점, 재시도200, 타 사용자403, 재시작 보존 확인 |
 | Step 1 배포 계획 | pass | 사용자가 서울/7일/US$20/보관14일 계획값을 Step 1·2 범위로 승인. plan_status=complete-for-step-1 |
-| 실제 배포 승인 Gate | unavailable / 범위 밖 | 계획값 approved=true지만 deployment_enabled=false, deployment_approval=not-granted. Step 3 전 별도 승인 필요 |
-| 실제 AWS 동작 | unavailable | DynamoDB·IAM·API Gateway·WAF·PITR·Streams/Pipes/Firehose/Athena·SNS 미실행 |
+| Step 1 당시 배포 Gate | historical / pass | 당시에는 실제 배포를 막았고 이후 Step 3을 별도 승인·plan·apply로 진행함 |
+| 실제 AWS 업무 동작 | unavailable | Step 3 리소스 존재는 확인했지만 DynamoDB 거래·API Gateway·Lambda·WAF 업무 호출은 아직 미실행 |
+
+## Step 4에서 추가한 코드 검사
+
+- DynamoDB Players+Events 조건부 거래 요청 구성과 consistent read.
+- 같은 이벤트의 안전한 재시도, 다른 본문 ID 충돌, 동시 버전 충돌.
+- 거래 응답이 불명확할 때 Events를 다시 읽어 이미 반영됐는지 판정.
+- 상태가 가리키는 이벤트가 없거나 저장소가 실패할 때 안전한 503.
+- 저장된 event 본문 hash·중복 필드·원래 응답 불일치 탐지.
+- API Gateway의 STS assumed-role ARN을 허용된 IAM caller role로 정규화.
+- Lambda 환경 설정 누락 시 fail closed, 정상 설정은 warm 환경에서 재사용.
 
 ## 증거 위치
 
@@ -41,4 +53,4 @@ Step 1의 구현 명세/배포 계획과 Step 2의 로컬 백엔드를 만든다
 
 SQLite의 거래/동시성은 로컬 어댑터의 관찰이며 DynamoDB의 원자성·지연·규모 검증이 아니다. 테스트 토큰은 공개 fixture이며 실제 인증/계정 보호가 아니다. 본문 hash는 서명이 아니다. 게임의 부정행위 방지·실제 사용자 UI·AWS 알림/복원·비용/RPO/RTO 측정도 하지 않았다.
 
-Step 3/4에서는 실제 DynamoDB 어댑터·IAM 매핑·배포 설정을 작성하고 같은 API 계약을 AWS에서 다시 확인해야 한다. 자동으로 SQLite로 대체하지 않는다. 이번 작업에서는 Step 3 이후를 진행하지 않았다.
+Step 4 apply 뒤 같은 API 계약을 실제 DynamoDB와 Alice/Bob 역할로 다시 확인해야 한다. AWS 오류 시 SQLite로 대체하지 않는다. Streams/Pipes/Firehose와 복구 실험은 아직 범위 밖이다.

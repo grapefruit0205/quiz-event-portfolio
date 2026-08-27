@@ -2,7 +2,7 @@
 
 **대상: SAA 합격 후 첫 구현. AWS 계정·키·Docker·추가 Python 패키지가 필요하지 않습니다.**
 
-10문제 퀴즈의 답안을 서버가 채점하고, 현재 점수와 플레이 이력을 저장합니다. Python 표준 라이브러리와 로컬 SQLite 파일을 사용합니다. **DynamoDB/실제 IAM/분석 파이프라인은 아직 구현·배포하지 않았습니다.**
+10문제 퀴즈의 답안을 서버가 채점하고, 현재 점수와 플레이 이력을 저장합니다. 로컬 실행은 Python 표준 라이브러리와 SQLite를 사용합니다. Step 4에서 같은 handler에 DynamoDB 어댑터와 AWS IAM 역할 매핑을 구현했지만 **AWS apply와 실제 API 호출 검증은 아직 하지 않았습니다.** 분석 파이프라인도 아직 없습니다.
 
 ## 1. 먼저 테스트
 
@@ -76,11 +76,11 @@ curl -sS -i http://127.0.0.1:8765/players/bob -H 'Authorization: Bearer local-al
 | --- | --- |
 | [quiz.py](quiz_backend/quiz.py) | 문제·입력 검사·채점·이벤트/hash 계약 |
 | [handler.py](quiz_backend/handler.py) | 인증된 신원 매핑·소유권 검사·API 응답 |
-| [storage.py](quiz_backend/storage.py) | 상태+이력 거래, 중복 요청, 버전 충돌 |
+| [storage.py](quiz_backend/storage.py) | SQLite 거래와 DynamoDB 조건부 거래, 중복 요청, 버전 충돌 |
 | [local_server.py](quiz_backend/local_server.py) | 로컬 HTTP 요청을 Lambda proxy 모양으로 변환 |
 | [demo.py](quiz_backend/demo.py) | 실제 HTTP 호출로 성공과 거부 결과 확인 |
 
-`handler.lambda_handler`를 AWS에 바로 올리면 **503 DEPLOYMENT_NOT_CONFIGURED**입니다. 의도한 차단입니다. Step 3/4에서 실제 DynamoDB 어댑터와 IAM 신원 매핑을 연결해야 합니다. 로컬 서버는 같은 요청 처리 함수 `build_handler`에 SQLite/테스트 신원을 명시적으로 연결합니다.
+`handler.lambda_handler`는 Terraform이 `PLAYERS_TABLE`, `EVENTS_TABLE`, `PRINCIPAL_MAP_JSON`을 모두 주입한 경우에만 DynamoDB 어댑터를 만듭니다. 설정이 빠지거나 잘못되면 **503 DEPLOYMENT_NOT_CONFIGURED**로 닫힙니다. 로컬 서버는 같은 요청 처리 함수 `build_handler`에 SQLite/테스트 신원을 명시적으로 연결합니다.
 
 ## 6. 범위와 검증
 
@@ -91,4 +91,4 @@ curl -sS -i http://127.0.0.1:8765/players/bob -H 'Authorization: Bearer local-al
 
 과거 v5 설계의 ScoreChanged/schema 1 대신 이 로컬 예제는 QuizCompleted/schema 2를 사용합니다. 배포된 데이터는 없으며 마이그레이션은 하지 않았습니다. 미래 Catalog/검증기도 이 계약에 맞춰야 합니다.
 
-이 HTTP 서버는 127.0.0.1 전용입니다. 인터넷 공개·터널링·실사용자 데이터 입력을 하지 마세요. 공개 웹 UI와 AWS 인증은 아직 없습니다. SQLite 동작을 DynamoDB·IAM·Streams·RPO/RTO의 실측으로 설명하지 마세요.
+이 로컬 HTTP 서버는 127.0.0.1 전용입니다. 인터넷 공개·터널링·실사용자 데이터 입력을 하지 마세요. 공개 웹 UI는 없습니다. AWS 어댑터 단위 테스트를 실제 DynamoDB·IAM·Streams·RPO/RTO의 실측으로 설명하지 마세요. Step 4 실제 검증 절차는 [Terraform Step 4 문서](../infra/terraform/STEP4.md)에 있습니다.

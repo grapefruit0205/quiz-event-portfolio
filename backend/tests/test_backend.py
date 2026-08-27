@@ -5,7 +5,9 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import Mock
+from unittest.mock import patch
 
+import quiz_backend.handler as handler_module
 from quiz_backend.handler import build_handler, lambda_handler
 from quiz_backend.local_server import LOCAL_PRINCIPALS
 from quiz_backend.quiz import MAX_BODY_BYTES, MAX_VERSION, content_hash
@@ -119,6 +121,13 @@ class BackendTests(unittest.TestCase):
                 self.assertEqual(self.call(self.submission(), principal=principal)[0], expected)
         self.assertEqual(self.rows("events"), [])
 
+    def test_assumed_role_identity_maps_to_configured_iam_role(self):
+        role = "arn:aws:iam::123456789012:role/quiz-event-portfolio-lab-alice-caller"
+        handler = build_handler(self.store, {role: "alice"}, clock=lambda: NOW)
+        event = self.event(path="/quiz", method="GET",
+                           principal="arn:aws:sts::123456789012:assumed-role/quiz-event-portfolio-lab-alice-caller/test-session")
+        self.assertEqual(handler(event)["statusCode"], 200)
+
     def test_two_users_may_use_same_event_id(self):
         self.assertEqual(self.call(self.submission())[0], 201)
         self.assertEqual(self.call(self.submission(), principal="local:bob", path="/players/bob/results")[0], 201)
@@ -223,9 +232,26 @@ class BackendTests(unittest.TestCase):
             self.assertNotIn(secret, text)
 
     def test_aws_entrypoint_is_fail_closed(self):
-        result = lambda_handler(self.event(self.submission()), None)
+        handler_module._AWS_HANDLER = None
+        with patch.dict("os.environ", {}, clear=True):
+            result = lambda_handler(self.event(self.submission()), None)
         self.assertEqual(result["statusCode"], 503)
         self.assertEqual(json.loads(result["body"])["error"]["code"], "DEPLOYMENT_NOT_CONFIGURED")
+
+    def test_aws_entrypoint_builds_configured_handler_once(self):
+        role = "arn:aws:iam::123456789012:role/alice"
+        fake_store = Mock()
+        handler_module._AWS_HANDLER = None
+        env = {"PLAYERS_TABLE": "players", "EVENTS_TABLE": "events",
+               "PRINCIPAL_MAP_JSON": json.dumps({role: "alice"})}
+        event = self.event(path="/quiz", method="GET",
+                           principal="arn:aws:sts::123456789012:assumed-role/alice/session")
+        with patch.dict("os.environ", env, clear=True), \
+                patch("quiz_backend.storage.DynamoDBStore", return_value=fake_store) as adapter:
+            self.assertEqual(lambda_handler(event, None)["statusCode"], 200)
+            self.assertEqual(lambda_handler(event, None)["statusCode"], 200)
+        adapter.assert_called_once_with("players", "events")
+        handler_module._AWS_HANDLER = None
 
 
 if __name__ == "__main__":

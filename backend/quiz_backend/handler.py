@@ -4,6 +4,7 @@ import base64
 import binascii
 import json
 import logging
+import os
 import re
 import uuid
 
@@ -12,6 +13,8 @@ from .quiz import (ApiError, MAX_BODY_BYTES, grade, parse_json, public_quiz,
 
 LOG = logging.getLogger("quiz_backend")
 PLAYER_PATH = re.compile(r"/players/([A-Za-z0-9][A-Za-z0-9_-]{0,63})(/results)?")
+ASSUMED_ROLE_ARN = re.compile(r"^arn:(?P<partition>[^:]+):sts::(?P<account>[0-9]{12}):assumed-role/(?P<role>[^/]+)/[^/]+$")
+_AWS_HANDLER = None
 
 
 def response(status: int, body: dict, request_id: str, replayed: bool = False) -> dict:
@@ -34,6 +37,12 @@ def _principal(event: dict, principal_map: dict) -> str:
     if not isinstance(principal, str) or not principal:
         raise ApiError(401, "UNAUTHENTICATED", "인증된 테스트 사용자가 필요합니다.")
     player = principal_map.get(principal)
+    if player is None:
+        assumed = ASSUMED_ROLE_ARN.fullmatch(principal)
+        if assumed is not None:
+            role_arn = (f"arn:{assumed['partition']}:iam::{assumed['account']}:"
+                        f"role/{assumed['role']}")
+            player = principal_map.get(role_arn)
     if player is None:
         raise ApiError(403, "FORBIDDEN", "허용되지 않은 사용자입니다.")
     return player
@@ -119,10 +128,26 @@ def build_handler(store, principal_map: dict[str, str], clock=utc_now):
 
 
 def lambda_handler(event, context):
-    """Fail closed until Step 3/4 wires DynamoDB and verified AWS principal mapping.
+    """Create the AWS adapter once per warm execution environment and fail closed."""
+    global _AWS_HANDLER
+    try:
+        if _AWS_HANDLER is None:
+            from .storage import DynamoDBStore
 
-    Do NOT deploy the local SQLite adapter to Lambda. Local execution uses
-    build_handler explicitly; AWS storage/identity integration is not implemented yet.
-    """
-    return error_response(ApiError(503, "DEPLOYMENT_NOT_CONFIGURED",
-                                  "Step 3/4의 DynamoDB·IAM 연결이 필요합니다."), str(uuid.uuid4()))
+            players_table = os.environ["PLAYERS_TABLE"]
+            events_table = os.environ["EVENTS_TABLE"]
+            principal_map = json.loads(os.environ["PRINCIPAL_MAP_JSON"])
+            if not isinstance(principal_map, dict):
+                raise ValueError("PRINCIPAL_MAP_JSON must be an object")
+            _AWS_HANDLER = build_handler(
+                DynamoDBStore(players_table, events_table),
+                principal_map,
+            )
+        return _AWS_HANDLER(event, context)
+    except Exception as exc:
+        request_id = str(uuid.uuid4())
+        LOG.error(json.dumps({"request_id": request_id,
+                              "error_type": type(exc).__name__,
+                              "error_code": "DEPLOYMENT_NOT_CONFIGURED"}))
+        return error_response(ApiError(503, "DEPLOYMENT_NOT_CONFIGURED",
+                                       "AWS 런타임 설정을 확인하세요."), request_id)

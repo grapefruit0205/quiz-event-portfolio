@@ -1,6 +1,11 @@
 locals {
   resource_prefix = "${var.project_name}-${var.environment}"
   bucket_prefix   = substr(local.resource_prefix, 0, 20)
+  operator_principal_arn = (
+    var.operator_principal_arn != null
+    ? var.operator_principal_arn
+    : data.aws_caller_identity.current.arn
+  )
 
   common_tags = merge({
     Project     = var.project_name

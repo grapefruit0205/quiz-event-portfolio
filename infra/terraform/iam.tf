@@ -35,12 +35,6 @@ resource "aws_iam_role_policy" "lambda_runtime" {
         ]
       },
       {
-        Sid      = "CreateFunctionLogGroup"
-        Effect   = "Allow"
-        Action   = "logs:CreateLogGroup"
-        Resource = "*"
-      },
-      {
         Sid    = "ManageVpcNetworkInterface"
         Effect = "Allow"
         Action = [
@@ -71,5 +65,44 @@ resource "aws_iam_role_policy" "lambda_runtime" {
         ]
       },
     ]
+  })
+}
+
+resource "aws_iam_role" "caller" {
+  for_each = toset(["alice", "bob"])
+
+  name = "${local.resource_prefix}-${each.key}-caller"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = "sts:AssumeRole"
+      Principal = {
+        AWS = local.operator_principal_arn
+      }
+    }]
+  })
+  permissions_boundary = var.permissions_boundary_arn
+
+  tags = {
+    Name      = "${local.resource_prefix}-${each.key}-caller"
+    Portfolio = "step-4"
+    Player    = each.key
+  }
+}
+
+resource "aws_iam_role_policy" "caller" {
+  for_each = aws_iam_role.caller
+
+  name = "${local.resource_prefix}-${each.key}-invoke"
+  role = each.value.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid      = "InvokeLabQuizApi"
+      Effect   = "Allow"
+      Action   = "execute-api:Invoke"
+      Resource = "${aws_api_gateway_rest_api.quiz.execution_arn}/${var.api_stage_name}/*/*"
+    }]
   })
 }

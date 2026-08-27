@@ -45,3 +45,21 @@ output "s3_buckets" {
 output "lambda_runtime_role_arn" {
   value = aws_iam_role.lambda_runtime.arn
 }
+
+output "api_invoke_url" {
+  description = "IAM SigV4 서명이 필요한 Step 4 API 기본 URL"
+  value       = aws_api_gateway_stage.lab.invoke_url
+}
+
+output "lambda_function_name" {
+  value = aws_lambda_function.api.function_name
+}
+
+output "caller_role_arns" {
+  description = "Alice/Bob 교차 접근 거부 실험용 역할"
+  value       = { for player, role in aws_iam_role.caller : player => role.arn }
+}
+
+output "waf_web_acl_arn" {
+  value = aws_wafv2_web_acl.api.arn
+}

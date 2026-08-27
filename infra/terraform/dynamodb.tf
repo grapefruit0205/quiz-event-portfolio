@@ -5,6 +5,11 @@ resource "aws_dynamodb_table" "players" {
 
   deletion_protection_enabled = var.dynamodb_deletion_protection_enabled
 
+  on_demand_throughput {
+    max_read_request_units  = var.dynamodb_max_read_request_units
+    max_write_request_units = var.dynamodb_max_write_request_units
+  }
+
   attribute {
     name = "player_id"
     type = "S"
@@ -59,6 +64,11 @@ resource "aws_dynamodb_table" "events" {
     name            = "recovery-by-time"
     projection_type = "ALL"
 
+    on_demand_throughput {
+      max_read_request_units  = var.dynamodb_max_read_request_units
+      max_write_request_units = var.dynamodb_max_write_request_units
+    }
+
     key_schema {
       attribute_name = "recovery_pk"
       key_type       = "HASH"
@@ -68,6 +78,11 @@ resource "aws_dynamodb_table" "events" {
       attribute_name = "recovery_sk"
       key_type       = "RANGE"
     }
+  }
+
+  on_demand_throughput {
+    max_read_request_units  = var.dynamodb_max_read_request_units
+    max_write_request_units = var.dynamodb_max_write_request_units
   }
 
   point_in_time_recovery {

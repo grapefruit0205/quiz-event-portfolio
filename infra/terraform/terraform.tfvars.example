@@ -10,4 +10,15 @@ private_subnet_cidrs = [
 
 dynamodb_pitr_recovery_period_days   = 14
 dynamodb_deletion_protection_enabled = true
+dynamodb_max_read_request_units      = 100
+dynamodb_max_write_request_units     = 100
+
+api_stage_name              = "lab"
+api_throttling_rate_limit   = 5
+api_throttling_burst_limit  = 10
+waf_rate_limit              = 100
+
+# Terraform을 STS assumed role로 실행할 때만 그 원본 IAM role ARN을 명시합니다.
+# operator_principal_arn = "arn:aws:iam::123456789012:role/example-deployer"
+
 allow_bucket_force_destroy           = false
