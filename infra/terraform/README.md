@@ -2,6 +2,12 @@
 
 Step 2의 로컬 API를 실제 AWS에 연결하기 전에 필요한 기반만 정의합니다. API Gateway·Lambda 코드 배포·WAF는 Step 4, Streams→Pipes→Firehose→S3와 Athena는 Step 5입니다.
 
+## 현재 배포 상태
+
+2026-08-27에 포트폴리오용 개발 계정의 서울 리전에 실제 적용했습니다. 결과는 `32 added / 0 changed / 0 destroyed`이며, apply 뒤 재계획에서 `No changes`를 확인했습니다. 공개 저장소에는 계정 ID와 리소스 ID를 기록하지 않습니다. 세부 검증은 [VERIFICATION.md](VERIFICATION.md)에 있습니다.
+
+Terraform state는 현재 이 개인 실습 환경의 로컬 파일에만 있으며 Git에서 제외되고 파일 권한은 `600`입니다. 팀 협업·CI/CD·재해 복구가 필요한 단계에서는 잠금이 있는 원격 backend로 이전해야 하지만, Step 3 개인 실습에는 추가하지 않았습니다.
+
 ## 생성 범위
 
 - VPC 1개와 서로 다른 AZ의 프라이빗 서브넷·라우팅 테이블 2개
@@ -56,4 +62,4 @@ Terraform 출력의 account_id와 aws_region이 의도한 실습 계정·서울 
 - [S3 Block Public Access](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html): 네 가지 버킷 공개 차단 설정.
 - [Terraform mock provider](https://developer.hashicorp.com/terraform/language/tests/mocking): 자격증명 없이 provider 동작을 모의하는 테스트.
 
-단일 리전이며 리전 전체 손실을 보호하지 않습니다. 실제 RPO/RTO, IAM 호출, DynamoDB transaction, PITR 복원, S3 객체 복구는 AWS 적용 이후 별도 실험으로 증명해야 합니다.
+단일 리전이며 리전 전체 손실을 보호하지 않습니다. 실제 RPO/RTO, 업무 `TransactWriteItems`, 다른 사용자 접근 거부, PITR 복원, S3 객체 복구는 후속 실험으로 증명해야 합니다.

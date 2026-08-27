@@ -6,9 +6,9 @@
 
 - **Step 1:** 게임 범위, API·데이터 계약, 향후 AWS 배포 계획
 - **Step 2:** Python·SQLite 기반 로컬 백엔드와 자동 테스트
-- **Step 3:** 단일 리전 AWS 기반 리소스 Terraform과 모의 plan 가드레일
+- **Step 3:** 단일 리전 AWS 기반 리소스 Terraform, 실제 배포와 상태 검증
 
-AWS 리소스와 유료 서비스는 아직 생성하지 않았습니다. Step 3은 자격증명 없는 Terraform 모의 plan까지 검증했으며 실제 AWS plan/apply는 포트폴리오용 개발 계정 인증 뒤에 진행합니다. 현재 백엔드는 `127.0.0.1`에서만 실행되며 SQLite는 로컬 거래와 재시작 보존을 확인하기 위한 어댑터입니다.
+Step 3 기반 리소스는 포트폴리오용 개발 계정의 서울 리전에 배포되어 있습니다. DynamoDB 온디맨드 요청·PITR과 S3 저장·요청에 따라 비용이 발생할 수 있습니다. API Gateway·Lambda 함수는 아직 배포하지 않았으며, 현재 백엔드는 `127.0.0.1`에서만 실행됩니다. SQLite는 로컬 거래와 재시작 보존을 확인하기 위한 어댑터입니다.
 
 ## 빠른 실행
 
@@ -47,5 +47,7 @@ python3 -m quiz_backend.demo
 - README만 사용한 독립 실행 검증
 - Terraform 포맷·구문 검증과 가드레일 테스트 통과
 - 모의 plan `32 add / 0 change / 0 destroy`
+- 실제 apply `32 added / 0 changed / 0 destroyed`
+- 실제 상태 조회와 apply 후 무변경 plan 통과
 
-실제 DynamoDB·IAM·S3 생성과 권한 동작은 아직 검증하지 않았습니다. API Gateway·Lambda·WAF는 Step 4, Streams·Pipes·Firehose·Athena는 Step 5 범위입니다.
+VPC·DynamoDB·S3·IAM 기반 설정은 실제 AWS 상태로 확인했습니다. 업무 데이터 거래, 다른 사용자 접근 거부, PITR 복원은 아직 실행하지 않았습니다. API Gateway·Lambda·WAF는 Step 4, Streams·Pipes·Firehose·Athena는 Step 5 범위입니다.
