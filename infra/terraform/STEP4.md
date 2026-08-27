@@ -55,17 +55,17 @@ terraform test
 AWS_PROFILE=quiz-event-portfolio terraform plan -out=step4.tfplan
 ```
 
-현재 저장한 plan은 `23 add / 3 change / 0 destroy`이며 실제 apply는 아직 하지 않았습니다. plan 파일과 state는 Git에서 제외합니다.
+검토한 plan `23 add / 3 change / 0 destroy`를 그대로 적용했고 결과도 `23 added / 3 changed / 0 destroyed`였습니다. apply 후 무변경 plan을 확인했습니다. plan 파일과 state는 Git에서 제외합니다.
 
 ## apply 후 실제 시나리오
 
-apply 승인을 받은 뒤 저장 plan을 적용하고 다음 스크립트를 실행합니다.
+저장 plan 적용 뒤 다음 스크립트로 라이브 시나리오를 실행했습니다.
 
 ```bash
 AWS_PROFILE=quiz-event-portfolio ./scripts/verify_step4.sh
 ```
 
-이 스크립트는 자격 증명을 출력하거나 저장소에 남기지 않고 다음을 확인합니다.
+이 스크립트는 자격 증명을 출력하거나 저장소에 남기지 않고 다음 항목을 모두 통과했습니다.
 
 1. 익명 요청 403.
 2. Alice의 퀴즈·자기 상태 조회 200.
@@ -74,7 +74,7 @@ AWS_PROFILE=quiz-event-portfolio ./scripts/verify_step4.sh
 5. 같은 event_id를 다른 본문으로 쓰면 409.
 6. Bob의 자기 상태 조회 200.
 
-스크립트 성공만으로 WAF rate rule, API 429, Lambda/DynamoDB throttling이 실제 발생했다고 주장하지 않습니다. 그 실험과 알람 수신은 Step 6에서 분리합니다.
+스크립트 성공만으로 WAF rate rule, API 429, Lambda/DynamoDB throttling이 실제 발생했다고 주장하지 않습니다. 그 실험과 알람 수신은 Step 6에서 분리합니다. AWS 설정 조회로 method 3개의 IAM 인증, stage 제한, Lambda VPC·런타임, WAF 연결, DynamoDB 최대 처리량과 로그 7일도 확인했습니다.
 
 ## 비용과 제한
 

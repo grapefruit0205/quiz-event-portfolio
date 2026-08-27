@@ -2,7 +2,7 @@
 
 **대상: SAA 합격 후 첫 구현. AWS 계정·키·Docker·추가 Python 패키지가 필요하지 않습니다.**
 
-10문제 퀴즈의 답안을 서버가 채점하고, 현재 점수와 플레이 이력을 저장합니다. 로컬 실행은 Python 표준 라이브러리와 SQLite를 사용합니다. Step 4에서 같은 handler에 DynamoDB 어댑터와 AWS IAM 역할 매핑을 구현했지만 **AWS apply와 실제 API 호출 검증은 아직 하지 않았습니다.** 분석 파이프라인도 아직 없습니다.
+10문제 퀴즈의 답안을 서버가 채점하고, 현재 점수와 플레이 이력을 저장합니다. 로컬 실행은 Python 표준 라이브러리와 SQLite를 사용합니다. Step 4에서는 같은 handler를 Lambda와 DynamoDB에 배포하고 AWS IAM 역할 호출을 검증했습니다. 분석 파이프라인은 아직 없습니다.
 
 ## 1. 먼저 테스트
 
@@ -91,4 +91,4 @@ curl -sS -i http://127.0.0.1:8765/players/bob -H 'Authorization: Bearer local-al
 
 과거 v5 설계의 ScoreChanged/schema 1 대신 이 로컬 예제는 QuizCompleted/schema 2를 사용합니다. 배포된 데이터는 없으며 마이그레이션은 하지 않았습니다. 미래 Catalog/검증기도 이 계약에 맞춰야 합니다.
 
-이 로컬 HTTP 서버는 127.0.0.1 전용입니다. 인터넷 공개·터널링·실사용자 데이터 입력을 하지 마세요. 공개 웹 UI는 없습니다. AWS 어댑터 단위 테스트를 실제 DynamoDB·IAM·Streams·RPO/RTO의 실측으로 설명하지 마세요. Step 4 실제 검증 절차는 [Terraform Step 4 문서](../infra/terraform/STEP4.md)에 있습니다.
+이 로컬 HTTP 서버는 127.0.0.1 전용입니다. 인터넷 공개·터널링·실사용자 데이터 입력을 하지 마세요. 공개 웹 UI는 없습니다. Step 4 실제 검증 절차와 범위는 [Terraform Step 4 문서](../infra/terraform/STEP4.md)에 있습니다. Streams·RPO/RTO는 아직 실측하지 않았습니다.

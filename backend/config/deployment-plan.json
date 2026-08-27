@@ -1,6 +1,6 @@
 {
   "project": "quiz-event-portfolio",
-  "scope": "step-1-through-3-foundation-deployed",
+  "scope": "step-1-through-4-api-deployed",
   "deployment_enabled": true,
   "account_id": null,
   "account_id_verified_locally": true,
@@ -37,7 +37,7 @@
     "S3",
     "Athena"
   ],
-  "deployment_approval": "granted-for-step3-apply",
+  "deployment_approval": "granted-for-step3-through-step8-apply",
   "step3_iac_authorized": true,
   "step3_iac_status": "implemented-and-locally-verified",
   "step3_aws_apply_status": "applied-and-verified",
@@ -53,11 +53,20 @@
     "applied_at": "2026-08-27T10:58:48+09:00"
   },
   "step3_post_apply_plan": "no-changes",
-  "deployed_scope": "step3-foundation-only",
+  "step4_iac_status": "implemented-and-verified",
+  "step4_actual_apply": {
+    "add": 23,
+    "change": 3,
+    "destroy": 0,
+    "applied_at": "2026-08-27T11:33:08+09:00"
+  },
+  "step4_post_apply_plan": "no-changes",
+  "step4_live_api_status": "passed",
+  "deployed_scope": "step3-foundation-and-step4-api",
   "plan_status": "complete-for-step-1",
   "plan_values_status": "approved-and-used-for-step3-apply",
   "current_goal_requires_deployment_approval": false,
-  "activation_gate_status": "satisfied-for-step3",
-  "planning_approval_scope": "documentation-local-implementation-terraform-and-step3-apply",
+  "activation_gate_status": "satisfied-for-step3-through-step8",
+  "planning_approval_scope": "documentation-local-implementation-terraform-and-step3-through-step8-apply",
   "planning_approved_at": "2026-08-27T08:56:14+09:00"
 }

@@ -4,7 +4,7 @@ Step 3의 기반 리소스와 Step 4의 API Gateway·Lambda·WAF를 한 state로
 
 ## 현재 배포 상태
 
-2026-08-27에 Step 3을 포트폴리오용 개발 계정의 서울 리전에 실제 적용했습니다. 결과는 `32 added / 0 changed / 0 destroyed`이며, apply 뒤 재계획에서 `No changes`를 확인했습니다. Step 4 코드는 작성했지만 아직 apply하지 않았습니다. 실제 state 기준 Step 4 plan은 `23 add / 3 change / 0 destroy`입니다. 공개 저장소에는 계정 ID와 리소스 ID를 기록하지 않습니다. 세부 검증은 [VERIFICATION.md](VERIFICATION.md)에 있습니다.
+2026-08-27에 Step 3과 Step 4를 포트폴리오용 개발 계정의 서울 리전에 실제 적용했습니다. Step 3은 `32 added / 0 changed / 0 destroyed`, Step 4는 `23 added / 3 changed / 0 destroyed`였으며 각 apply 뒤 재계획에서 `No changes`를 확인했습니다. 공개 저장소에는 계정 ID와 리소스 ID를 기록하지 않습니다. 세부 검증은 [VERIFICATION.md](VERIFICATION.md)에 있습니다.
 
 Terraform state는 현재 이 개인 실습 환경의 로컬 파일에만 있으며 Git에서 제외되고 파일 권한은 `600`입니다. 팀 협업·CI/CD·재해 복구가 필요한 단계에서는 잠금이 있는 원격 backend로 이전해야 하지만, Step 3 개인 실습에는 추가하지 않았습니다.
 
@@ -68,4 +68,4 @@ Terraform 출력의 account_id와 aws_region이 의도한 실습 계정·서울 
 - [Terraform mock provider](https://developer.hashicorp.com/terraform/language/tests/mocking): 자격증명 없이 provider 동작을 모의하는 테스트.
 - [AWS WAF 요금](https://aws.amazon.com/waf/pricing/): web ACL·rule·처리 요청별 요금.
 
-단일 리전이며 리전 전체 손실을 보호하지 않습니다. Step 4 apply 전에는 업무 `TransactWriteItems`와 다른 사용자 접근 거부가 실제 AWS에서 동작했다고 주장하지 않습니다. PITR 복원, S3 객체 복구와 RPO/RTO는 후속 실험으로 증명해야 합니다. IAM 사용자 MFA와 광범위한 부트스트랩 권한 축소도 남아 있습니다.
+단일 리전이며 리전 전체 손실을 보호하지 않습니다. 업무 `TransactWriteItems`와 다른 사용자 접근 거부는 실제 AWS에서 확인했습니다. PITR 복원, S3 객체 복구와 RPO/RTO는 후속 실험으로 증명해야 합니다. IAM 사용자 MFA와 광범위한 부트스트랩 권한 축소도 남아 있습니다.

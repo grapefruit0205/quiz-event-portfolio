@@ -2,7 +2,7 @@
 
 기본 주소: `http://127.0.0.1:8765`. 모든 요청은 로컬 테스트 사용자 선택을 위해 `Authorization: Bearer local-alice` 또는 `Bearer local-bob`를 사용한다. 이는 AWS 인증이 아니다.
 
-Step 4 AWS 모드에서는 Terraform 출력 `api_invoke_url`이 기본 주소이며 세 method 모두 `AWS_IAM`이다. Alice/Bob 테스트 역할을 assume한 임시 자격 증명으로 SigV4 서명한다. 로컬 Bearer 토큰을 AWS API에서 사용하지 않는다.
+Step 4 AWS 모드에서는 Terraform 출력 `api_invoke_url`이 기본 주소이며 세 method 모두 `AWS_IAM`이다. Alice/Bob 테스트 역할을 assume한 임시 자격 증명으로 SigV4 서명한다. 로컬 Bearer 토큰을 AWS API에서 사용하지 않는다. 이 경로는 실제 서울 리전 배포와 호출 검증을 통과했다.
 
 ## 세 API
 
@@ -81,7 +81,7 @@ Step 4 AWS 모드에서는 Terraform 출력 `api_invoke_url`이 기본 주소이
 
 Players: player_id, 가장 최근 score, version, latest_event_id.
 
-Events: 키 `(player_id,event_id)`, request_hash, payload_hash, 이벤트 본문, 원래 응답, 시간 검색용 키. 로컬 저장은 한 SQLite 거래다. DynamoDB 어댑터는 Players의 version 조건과 Events의 키 부재 조건을 `TransactWriteItems` 한 번에 묶는다. 이 AWS 경로의 실제 실행 검증은 Step 4 apply 후 수행한다.
+Events: 키 `(player_id,event_id)`, request_hash, payload_hash, 이벤트 본문, 원래 응답, 시간 검색용 키. 로컬 저장은 한 SQLite 거래다. DynamoDB 어댑터는 Players의 version 조건과 Events의 키 부재 조건을 `TransactWriteItems` 한 번에 묶는다. Step 4 라이브 시험에서 새 저장·동일 요청 재시도·다른 내용 충돌을 확인했다.
 
 request_hash 입력: schema_version=2, event_type=QuizCompleted, player_id, event_id, quiz_id, expected_version, answers, test_run_id.
 
@@ -93,4 +93,4 @@ payload_hash 입력: schema_version=2, event_type=QuizCompleted, player_id, even
 
 ## 보안 범위
 
-서버 채점·소유권 검사·중복 제출 방지를 시험한다. 공개된 고정 문제/정답, 테스트 역할, 무제한 새 플레이를 이용한 부정행위까지 막는 게임은 아니다. 클라이언트 위변조 방지·회원가입·계정 탈취 대응은 포함하지 않는다. `AWS_IAM` 구성은 Terraform plan까지 확인했으며 실제 호출 증거는 apply 후에만 추가한다.
+서버 채점·소유권 검사·중복 제출 방지를 시험한다. 공개된 고정 문제/정답, 테스트 역할, 무제한 새 플레이를 이용한 부정행위까지 막는 게임은 아니다. 클라이언트 위변조 방지·회원가입·계정 탈취 대응은 포함하지 않는다. `AWS_IAM`은 실제 익명 요청 거부와 Alice/Bob 역할 호출로 검증했다.

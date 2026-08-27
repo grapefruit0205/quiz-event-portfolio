@@ -101,7 +101,14 @@ grep -qi '^x-idempotent-replay: true' "${temp_dir}/replay.headers" || {
   echo "FAIL replay header missing" >&2
   exit 1
 }
-cmp -s "${temp_dir}/created.json" "${temp_dir}/replay.json" || {
+python3 - "${temp_dir}/created.json" "${temp_dir}/replay.json" <<'PY' || {
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as first, open(sys.argv[2], encoding="utf-8") as replay:
+    if json.load(first) != json.load(replay):
+        raise SystemExit(1)
+PY
   echo "FAIL replay body differs from original" >&2
   exit 1
 }

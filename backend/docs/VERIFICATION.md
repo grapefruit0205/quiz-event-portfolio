@@ -6,7 +6,7 @@
 
 Step 1의 구현 명세/배포 계획과 Step 2의 로컬 백엔드를 만든다는 목표에 맞는 산출물이다. **Step 1 계획 작성과 Step 2 로컬 구현·검증을 완료했다.** 이후 Step 3 기반은 실제 배포됐으며 그 증거는 Terraform 검증 문서에 분리했다.
 
-이후 Step 4의 DynamoDB 저장 어댑터와 Lambda 환경 연결을 추가했다. 2026-08-27 전체 자동 테스트는 38개가 통과했다. 이 결과는 AWS SDK 호출 모형을 이용한 코드 검증이며 실제 DynamoDB 거래 성공 증거는 아니다.
+이후 Step 4의 DynamoDB 저장 어댑터와 Lambda 환경 연결을 추가했다. 2026-08-27 전체 자동 테스트 38개와 실제 AWS IAM API 시나리오가 통과했다. 코드 모형 시험과 실제 AWS 증거는 구분해 기록한다.
 
 ## 수행한 검사
 
@@ -26,7 +26,7 @@ Step 1의 구현 명세/배포 계획과 Step 2의 로컬 백엔드를 만든다
 | 독립 실행 | pass | 별도 검토자가 README 테스트·서버·데모·curl·재시작을 실행. 정상201/70점, 재시도200, 타 사용자403, 재시작 보존 확인 |
 | Step 1 배포 계획 | pass | 사용자가 서울/7일/US$20/보관14일 계획값을 Step 1·2 범위로 승인. plan_status=complete-for-step-1 |
 | Step 1 당시 배포 Gate | historical / pass | 당시에는 실제 배포를 막았고 이후 Step 3을 별도 승인·plan·apply로 진행함 |
-| 실제 AWS 업무 동작 | unavailable | Step 3 리소스 존재는 확인했지만 DynamoDB 거래·API Gateway·Lambda·WAF 업무 호출은 아직 미실행 |
+| 실제 AWS 업무 동작 | pass | 익명403, Alice 자기 조회200·Bob 조회403, 새 거래201, 동일 재시도200, 다른 본문 충돌409, Bob 자기 조회200 |
 
 ## Step 4에서 추가한 코드 검사
 
@@ -53,4 +53,4 @@ Step 1의 구현 명세/배포 계획과 Step 2의 로컬 백엔드를 만든다
 
 SQLite의 거래/동시성은 로컬 어댑터의 관찰이며 DynamoDB의 원자성·지연·규모 검증이 아니다. 테스트 토큰은 공개 fixture이며 실제 인증/계정 보호가 아니다. 본문 hash는 서명이 아니다. 게임의 부정행위 방지·실제 사용자 UI·AWS 알림/복원·비용/RPO/RTO 측정도 하지 않았다.
 
-Step 4 apply 뒤 같은 API 계약을 실제 DynamoDB와 Alice/Bob 역할로 다시 확인해야 한다. AWS 오류 시 SQLite로 대체하지 않는다. Streams/Pipes/Firehose와 복구 실험은 아직 범위 밖이다.
+Step 4에서 같은 API 계약을 실제 DynamoDB와 Alice/Bob 역할로 확인했다. AWS 오류 시 SQLite로 대체하지 않는다. Streams/Pipes/Firehose와 복구 실험은 아직 범위 밖이다.
