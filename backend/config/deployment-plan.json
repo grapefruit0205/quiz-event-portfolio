@@ -1,6 +1,6 @@
 {
   "project": "quiz-event-portfolio",
-  "scope": "step-1-through-5-analysis-deployed",
+  "scope": "step-1-through-6-monitoring-deployed",
   "deployment_enabled": true,
   "account_id": null,
   "account_id_verified_locally": true,
@@ -62,7 +62,7 @@
   },
   "step4_post_apply_plan": "no-changes",
   "step4_live_api_status": "passed",
-  "deployed_scope": "step3-foundation-step4-api-and-step5-analysis",
+  "deployed_scope": "step3-foundation-step4-api-step5-analysis-and-step6-monitoring",
   "plan_status": "complete-for-step-1",
   "plan_values_status": "approved-and-used-for-step3-apply",
   "current_goal_requires_deployment_approval": false,
@@ -80,5 +80,16 @@
   "step5_ndjson_fix": "in-place-prefix-template-and-catalog-update",
   "step5_live_delivery_status": "passed-dynamodb-s3-athena-content-match",
   "step5_pipe_dlq_status": "empty-after-live-verification",
-  "step5_post_apply_plan": "no-changes"
+  "step5_post_apply_plan": "no-changes",
+  "step6_iac_status": "implemented-and-verified",
+  "step6_actual_apply": {
+    "add": 14,
+    "change": 0,
+    "destroy": 0,
+    "applied_at": "2026-08-27T12:34:19+09:00"
+  },
+  "step6_first_apply_issue": "sns-policy-action-scope-corrected-before-resume",
+  "step6_budget_status": "monthly-usd20-actual80-forecast100",
+  "step6_live_notification_status": "passed-cloudwatch-sns-sqs-and-reset",
+  "step6_post_apply_plan": "no-changes"
 }

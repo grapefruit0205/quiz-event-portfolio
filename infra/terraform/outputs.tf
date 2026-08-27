@@ -74,3 +74,21 @@ output "analysis_pipeline" {
     athena_workgroup = aws_athena_workgroup.analytics.name
   }
 }
+
+output "monitoring" {
+  value = {
+    alert_topic_arn    = aws_sns_topic.alerts.arn
+    evidence_queue_url = aws_sqs_queue.alarm_evidence.url
+    budget_name        = aws_budgets_budget.monthly_lab.name
+    alarm_names = {
+      api_high_requests       = aws_cloudwatch_metric_alarm.api_high_requests.alarm_name
+      lambda_high_concurrency = aws_cloudwatch_metric_alarm.lambda_high_concurrency.alarm_name
+      lambda_throttles        = aws_cloudwatch_metric_alarm.lambda_throttles.alarm_name
+      players_write_throttles = aws_cloudwatch_metric_alarm.dynamodb_write_throttles["players"].alarm_name
+      events_write_throttles  = aws_cloudwatch_metric_alarm.dynamodb_write_throttles["events"].alarm_name
+      pipe_execution_failed   = aws_cloudwatch_metric_alarm.pipe_execution_failed.alarm_name
+      firehose_delivery       = aws_cloudwatch_metric_alarm.firehose_delivery_failed.alarm_name
+      pipe_dlq_visible        = aws_cloudwatch_metric_alarm.pipe_dlq_visible.alarm_name
+    }
+  }
+}

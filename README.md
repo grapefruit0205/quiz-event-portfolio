@@ -8,8 +8,10 @@
 - **Step 2:** Python·SQLite 기반 로컬 백엔드와 자동 테스트
 - **Step 3:** 단일 리전 AWS 기반 리소스 Terraform, 실제 배포와 상태 검증
 - **Step 4:** DynamoDB 거래 어댑터, IAM 인증 API Gateway·Lambda·WAF 구현과 실제 plan 검증
+- **Step 5:** Streams→Pipes→Firehose→S3 전달과 Athena 내용 대조
+- **Step 6:** API·Lambda·DynamoDB·분석 경로 알람, Budget, 실제 SNS 알림 수신
 
-Step 3 기반과 Step 4 API는 포트폴리오용 개발 계정의 서울 리전에 배포되어 있습니다. 실제 IAM 서명 요청으로 익명 거부, Alice/Bob 소유권 분리, DynamoDB 거래 저장과 재시도를 확인했습니다. 로컬 SQLite 모드도 독립 실행할 수 있습니다.
+Step 3~6은 포트폴리오용 개발 계정의 서울 리전에 배포되어 있습니다. 실제 IAM 서명 요청, 데이터 원본→S3→Athena 내용 일치, 시험 알람의 SNS→암호화 SQS 수신을 확인했습니다. 로컬 SQLite 모드도 독립 실행할 수 있습니다.
 
 ## 빠른 실행
 
@@ -37,6 +39,8 @@ python3 -m quiz_backend.demo
 - [Step 3 Terraform 범위·실행 안내](infra/terraform/README.md)
 - [Step 3 검증 기록](infra/terraform/VERIFICATION.md)
 - [Step 4 API·보안·비용 가드레일](infra/terraform/STEP4.md)
+- [Step 5 이벤트 전달·Athena 분석](infra/terraform/STEP5.md)
+- [Step 6 선제 모니터링·비용 알림](infra/terraform/STEP6.md)
 
 ## 검증 결과
 
@@ -53,5 +57,7 @@ python3 -m quiz_backend.demo
 - 실제 상태 조회와 apply 후 무변경 plan 통과
 - Step 4 mock 가드레일 통과, 실제 plan `23 add / 3 change / 0 destroy`, 삭제·교체 0
 - Step 4 실제 apply `23 added / 3 changed / 0 destroyed`, 라이브 API 시나리오와 무변경 plan 통과
+- Step 5 실제 전달에서 형식 결함을 찾아 수정하고 DynamoDB·S3·Athena 내용 대조 통과
+- Step 6 리소스 14개 추가, 8개 알람·Budget·SNS→SQS 라이브 알림 수신 통과
 
-VPC·DynamoDB·S3·IAM 기반과 Step 4 API Gateway·Lambda·WAF는 실제 AWS 상태와 호출로 확인했습니다. Streams·Pipes·Firehose·Athena는 Step 5 범위입니다. IAM 사용자 MFA 등록과 광범위한 부트스트랩 권한 축소는 보안 부채로 남겨 두었습니다.
+VPC부터 분석·알림 경로까지 실제 AWS 상태와 호출로 확인했습니다. 실제 과부하 유발, 24시간을 넘긴 이력 재전송은 각각 의도적으로 제외하거나 Step 7에서 다룹니다. IAM 사용자 MFA 등록과 광범위한 부트스트랩 권한 축소는 보안 부채로 남겨 두었습니다.

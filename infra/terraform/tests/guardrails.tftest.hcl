@@ -210,4 +210,45 @@ run "step4_guardrails" {
     )
     error_message = "Glue JSON table과 10 MiB 스캔 상한·SSE-S3 결과의 Athena workgroup이 필요합니다."
   }
+
+  assert {
+    condition = (
+      aws_sqs_queue.alarm_evidence.message_retention_seconds == 86400 &&
+      aws_sqs_queue.alarm_evidence.sqs_managed_sse_enabled &&
+      aws_sns_topic_subscription.alarm_evidence.protocol == "sqs" &&
+      aws_sns_topic_subscription.alarm_evidence.raw_message_delivery
+    )
+    error_message = "알림 증거는 SNS에서 1일 보관 암호화 SQS로 원문 전달되어야 합니다."
+  }
+
+  assert {
+    condition = (
+      aws_cloudwatch_metric_alarm.api_high_requests.threshold == var.api_throttling_rate_limit * 60 * 0.8 &&
+      aws_cloudwatch_metric_alarm.api_high_requests.evaluation_periods == 2 &&
+      aws_cloudwatch_metric_alarm.api_high_requests.datapoints_to_alarm == 2 &&
+      aws_cloudwatch_metric_alarm.lambda_high_concurrency.threshold == var.lambda_concurrency_warning_threshold &&
+      aws_cloudwatch_metric_alarm.lambda_throttles.metric_name == "Throttles"
+    )
+    error_message = "API·Lambda는 한도 전 경고와 실제 throttle 경고를 분리해야 합니다."
+  }
+
+  assert {
+    condition = (
+      length(aws_cloudwatch_metric_alarm.dynamodb_write_throttles) == 2 &&
+      alltrue([for alarm in aws_cloudwatch_metric_alarm.dynamodb_write_throttles : alarm.metric_name == "WriteThrottleEvents"]) &&
+      aws_cloudwatch_metric_alarm.pipe_execution_failed.metric_name == "ExecutionFailed" &&
+      aws_cloudwatch_metric_alarm.firehose_delivery_failed.metric_name == "DeliveryToS3.Success" &&
+      aws_cloudwatch_metric_alarm.pipe_dlq_visible.metric_name == "ApproximateNumberOfMessagesVisible"
+    )
+    error_message = "DynamoDB·Pipe·Firehose·DLQ 실패 신호에 각각 알람이 필요합니다."
+  }
+
+  assert {
+    condition = (
+      aws_budgets_budget.monthly_lab.limit_amount == tostring(var.monthly_budget_usd) &&
+      aws_budgets_budget.monthly_lab.budget_type == "COST" &&
+      aws_budgets_budget.monthly_lab.time_unit == "MONTHLY"
+    )
+    error_message = "월 US$20 기본 COST Budget이 필요합니다."
+  }
 }

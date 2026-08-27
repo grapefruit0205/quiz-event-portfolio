@@ -165,6 +165,28 @@ variable "permissions_boundary_arn" {
   nullable    = true
 }
 
+variable "lambda_concurrency_warning_threshold" {
+  description = "Quiz Lambda 동시 실행 경고값. 현재 개인 실습 계정 한도 10보다 낮게 둡니다."
+  type        = number
+  default     = 8
+
+  validation {
+    condition     = var.lambda_concurrency_warning_threshold >= 1 && var.lambda_concurrency_warning_threshold <= 20 && floor(var.lambda_concurrency_warning_threshold) == var.lambda_concurrency_warning_threshold
+    error_message = "Lambda 동시 실행 경고값은 1~20 정수여야 합니다."
+  }
+}
+
+variable "monthly_budget_usd" {
+  description = "월간 비용 알림 기준. 강제 지출 상한은 아닙니다."
+  type        = number
+  default     = 20
+
+  validation {
+    condition     = var.monthly_budget_usd >= 1 && var.monthly_budget_usd <= 100
+    error_message = "개인 실습 월 예산 알림은 US$1~100 범위여야 합니다."
+  }
+}
+
 variable "additional_tags" {
   description = "기본 태그에 추가할 사용자 태그"
   type        = map(string)
