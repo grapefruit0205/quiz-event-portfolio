@@ -1,10 +1,10 @@
-# Step 3 기반부터 Step 7 제한 속도 복구까지의 Terraform
+# Step 3 기반부터 Step 8 최종 검증까지
 
-Step 3의 기반 리소스부터 Step 7의 수동 복구 제어까지 한 state로 관리합니다. 상세 설명은 [STEP4.md](STEP4.md), [STEP5.md](STEP5.md), [STEP6.md](STEP6.md), [STEP7.md](STEP7.md)에 있습니다.
+Step 3의 기반 리소스부터 Step 7의 수동 복구 제어까지 한 state로 관리하고 Step 8에서 통합 검증합니다. 상세 설명은 [STEP4.md](STEP4.md), [STEP5.md](STEP5.md), [STEP6.md](STEP6.md), [STEP7.md](STEP7.md), [STEP8.md](STEP8.md)에 있습니다.
 
 ## 현재 배포 상태
 
-2026-08-27에 Step 3~7을 포트폴리오용 개발 계정의 서울 리전에 실제 적용했습니다. Step 7은 복구 작업 테이블·운영자 역할·정책 3개를 추가하고, 통제된 분석 장애에서 원본 누락 0건과 Athena 복구 RTO 86초를 관찰했습니다. 공개 저장소에는 계정 ID와 리소스 ID를 기록하지 않습니다. 세부 검증은 [VERIFICATION.md](VERIFICATION.md)에 있습니다.
+2026-08-27에 Step 3~7을 포트폴리오용 개발 계정의 서울 리전에 실제 적용하고, 신규 리소스 없는 Step 8 통합 검증을 139초에 통과했습니다. 통제된 분석 장애의 원본 누락은 0건, Athena 복구 RTO는 86초였습니다. 공개 저장소에는 계정 ID와 리소스 ID를 기록하지 않습니다. 세부 검증은 [VERIFICATION.md](VERIFICATION.md)에 있습니다.
 
 Terraform state는 현재 이 개인 실습 환경의 로컬 파일에만 있으며 Git에서 제외되고 파일 권한은 `600`입니다. 팀 협업·CI/CD·재해 복구가 필요한 단계에서는 잠금이 있는 원격 backend로 이전해야 하지만, Step 3 개인 실습에는 추가하지 않았습니다.
 

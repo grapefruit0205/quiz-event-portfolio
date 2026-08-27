@@ -11,8 +11,9 @@
 - **Step 5:** Streams→Pipes→Firehose→S3 전달과 Athena 내용 대조
 - **Step 6:** API·Lambda·DynamoDB·분석 경로 알람, Budget, 실제 SNS 알림 수신
 - **Step 7:** 누락 범위 식별, 초당 1건 수동 복구, 알람 일시정지와 checkpoint 재개
+- **Step 8:** API·분석·알림·복구 증거의 최종 통합 검증
 
-Step 3~7은 포트폴리오용 개발 계정의 서울 리전에 배포되어 있습니다. 실제 IAM 서명 요청, 데이터 원본→S3→Athena 내용 일치, 알림 수신, 통제된 분석 장애의 중단·재개 복구를 확인했습니다. 로컬 SQLite 모드도 독립 실행할 수 있습니다.
+Step 3~7은 포트폴리오용 개발 계정의 서울 리전에 배포되어 있고 Step 8 통합 검증까지 완료했습니다. 실제 IAM 서명 요청, 데이터 원본→S3→Athena 내용 일치, 알림 수신, 통제된 분석 장애의 중단·재개 복구를 확인했습니다. 로컬 SQLite 모드도 독립 실행할 수 있습니다.
 
 ## 빠른 실행
 
@@ -33,6 +34,7 @@ python3 -m quiz_backend.demo
 
 ## 문서
 
+- [포트폴리오 아키텍처·장애 시나리오·증거](PORTFOLIO.md)
 - [Step 1 명세·배포 계획](backend/docs/STEP1.md)
 - [API 계약](backend/docs/API.md)
 - [백엔드 실행 안내](backend/README.md)
@@ -43,6 +45,7 @@ python3 -m quiz_backend.demo
 - [Step 5 이벤트 전달·Athena 분석](infra/terraform/STEP5.md)
 - [Step 6 선제 모니터링·비용 알림](infra/terraform/STEP6.md)
 - [Step 7 제한 속도 수동 복구](infra/terraform/STEP7.md)
+- [Step 8 최종 통합 검증](infra/terraform/STEP8.md)
 
 ## 검증 결과
 
@@ -62,5 +65,6 @@ python3 -m quiz_backend.demo
 - Step 5 실제 전달에서 형식 결함을 찾아 수정하고 DynamoDB·S3·Athena 내용 대조 통과
 - Step 6 리소스 14개 추가, 8개 알람·Budget·SNS→SQS 라이브 알림 수신 통과
 - Step 7 통제 장애에서 원본 누락 0건, checkpoint 재개, Athena 복구 RTO 86초 관찰
+- Step 8 전체 통합 검증 139초, 실제 AWS 최종 plan 무변경
 
 VPC부터 제한 속도 복구까지 실제 AWS 상태와 호출로 확인했습니다. 실제 과부하와 리전 장애는 의도적으로 유발하지 않았습니다. IAM 사용자 MFA 등록과 광범위한 부트스트랩 권한 축소는 보안 부채로 남겨 두었습니다.

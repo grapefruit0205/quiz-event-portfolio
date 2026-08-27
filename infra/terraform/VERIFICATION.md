@@ -1,4 +1,4 @@
-# Step 3~7 배포·구현 검증 기록
+# Step 3~8 배포·구현 검증 기록
 
 2026-08-27 · observed · Terraform 1.15.8 / hashicorp/aws 6.62.0 / AWS CLI 2.36.32
 
@@ -13,6 +13,8 @@ Step 5의 Pipes·Firehose·S3·Glue·Athena를 리소스 12개 추가로 적용�
 Step 6의 CloudWatch 알람 8개, SNS·SQS 증거 경로, 월 US$20 Budget을 기존 리소스 변경·삭제 없이 14개 추가했다. 고유 시험 알람이 SNS를 거쳐 암호화 SQS에 도착하고 알람이 정상 상태로 복귀한 것을 확인했다.
 
 Step 7의 RecoveryJobs·복구 운영자 역할·정책 3개를 추가했다. 통제된 Pipe 장애에서 누락 범위를 찾고 알람 일시정지, 동시 작업 거부, checkpoint 중단·재개, S3·Athena 복원을 통과했다.
+
+Step 8은 새 리소스 없이 API·분석·알림을 다시 실행하고 Step 7 완료 증거를 읽기 전용으로 확인했다. 전체 139초, 최종 plan 무변경으로 통과했다.
 
 ## 수행한 검사
 
@@ -78,6 +80,19 @@ Step 7의 RecoveryJobs·복구 운영자 역할·정책 3개를 추가했다. �
 | 분석 복구 RTO | observed | 운영자 resume부터 Athena 복원 확인까지 86초 |
 | 회귀 테스트 | pass | 복구 Python 테스트 5개, `Z`/`+00:00` 동등 시각 포함 |
 
+## Step 8 최종 통합 검사
+
+| 검사 | 판정 | 실제 관찰 |
+| --- | --- | --- |
+| 신규 AWS 리소스 | 없음 | Step 8은 테스트 이벤트·알림만 생성 |
+| 로컬 회귀 | pass | 백엔드 38개 + 복구 5개 |
+| API·분석 내용 | pass | 권한/거래 시나리오, DynamoDB·S3·Athena 내용 대조 |
+| 알림 | pass | 8 alarms, Budget, SNS→SSE-SQS 실제 수신 |
+| 복구 증거 | pass | 완료 작업·수동 레코드 2건·checkpoint·잠금 없음·Pipe RUNNING |
+| 최종 drift | pass | `No changes. Your infrastructure matches the configuration.` |
+| 공개 안전성 | pass | 자격증명 패턴·실제 계정/API/VPC 식별자 없음 |
+| 전체 시간 | observed | 139초 |
+
 ## Step 4 apply 전 검사
 
 | 검사 | 판정 | 실제 관찰 |
@@ -107,4 +122,4 @@ Step 7의 RecoveryJobs·복구 운영자 역할·정책 3개를 추가했다. �
 - 리전 전체 장애 복구와 원격 Terraform state 복구
 - 부트스트랩 배포 사용자의 MFA 등록과 `PowerUserAccess`를 전용 배포 역할로 축소하는 작업
 
-API·분석·알림·제한 속도 복구의 Step 4~7 검증을 완료했다. 현재 리소스는 비용이 발생할 수 있으므로 실습 종료 시 [README.md](README.md)의 보호 해제·destroy 절차를 따른다.
+API·분석·알림·제한 속도 복구와 Step 8 통합 검증을 완료했다. 현재 리소스는 비용이 발생할 수 있으므로 실습 종료 시 [README.md](README.md)의 보호 해제·destroy 절차를 따른다.

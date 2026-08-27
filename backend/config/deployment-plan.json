@@ -1,6 +1,6 @@
 {
   "project": "quiz-event-portfolio",
-  "scope": "step-1-through-7-recovery-deployed",
+  "scope": "step-1-through-8-portfolio-verified",
   "deployment_enabled": true,
   "account_id": null,
   "account_id_verified_locally": true,
@@ -63,7 +63,7 @@
   "step4_post_apply_plan": "no-changes",
   "step4_live_api_status": "passed",
   "deployed_scope": "step3-foundation-step4-api-step5-analysis-step6-monitoring-and-step7-recovery",
-  "plan_status": "complete-for-step-1",
+  "plan_status": "complete-through-step-8",
   "plan_values_status": "approved-and-used-for-step3-apply",
   "current_goal_requires_deployment_approval": false,
   "activation_gate_status": "satisfied-for-step3-through-step8",
@@ -103,5 +103,10 @@
   "step7_live_recovery_status": "passed-gap-pause-lock-checkpoint-resume-s3-athena",
   "step7_observed_source_rpo_events": 0,
   "step7_observed_analysis_recovery_rto_seconds": 86,
-  "step7_post_apply_plan": "no-changes"
+  "step7_post_apply_plan": "no-changes",
+  "step8_status": "integrated-verification-passed",
+  "step8_new_aws_resources": 0,
+  "step8_integrated_duration_seconds": 139,
+  "step8_checks": "backend-recovery-terraform-api-analysis-alert-recovery-evidence-drift-secret-scan",
+  "step8_post_verification_plan": "no-changes"
 }
